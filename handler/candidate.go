@@ -35,25 +35,28 @@ func CreateCandidate(c *gin.Context) {
 	var dto model.CandidateCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[CreateCandidate] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "添加失败")
 		return
 	}
 	// 业务处理
 	err := service.CreateCandidate(c, &dto)
 	if err != nil {
 		log.Printf("[CreateCandidate] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "添加失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "添加候选人成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 删除候选人信息
@@ -70,15 +73,17 @@ func DelCandidateByCandidateId(c *gin.Context) {
 	err := service.DelCandidateByCandidateId(c, candidateId)
 	if err != nil {
 		log.Printf("[DelCandidateByCandidateId] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "删除候选人成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 更新候选人信息
@@ -93,25 +98,28 @@ func UpdateCandidateById(c *gin.Context) {
 	var dto model.CandidateEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[UpdateCandidateById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败")
 		return
 	}
 	// 业务处理
 	err := service.UpdateCandidateById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateCandidateById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "编辑失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "编辑候选人成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 根据姓名查询候选人

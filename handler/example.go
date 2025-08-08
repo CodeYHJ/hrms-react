@@ -59,17 +59,17 @@ func CreateExample(c *gin.Context) {
 	var dto model.ExampleCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[CreateExample] err = %v", err)
-		sendFail(c, 5001, err.Error())
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.CreateExample(c, &dto)
 	if err != nil {
 		log.Printf("[CreateExample] err = %v", err)
-		sendFail(c, 5002, err.Error())
+		sendFail(c, 5002, "添加失败"+err.Error())
 		return
 	}
-	sendSuccess(c, nil, "")
+	sendSuccess(c, nil, "添加成功")
 }
 
 // UpdateExampleById godoc
@@ -84,25 +84,28 @@ func UpdateExampleById(c *gin.Context) {
 	var dto model.ExampleEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[UpdateExampleById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.UpdateExampleById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateExampleById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "编辑成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // DelExample godoc
@@ -119,15 +122,17 @@ func DelExample(c *gin.Context) {
 	err := service.DelExampleByExampleId(c, exampleId)
 	if err != nil {
 		log.Printf("[DelExample] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "删除成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // GetExampleByName godoc

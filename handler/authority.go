@@ -144,23 +144,26 @@ func SetAdminByStaffId(c *gin.Context) {
 	staffId := c.Param("staff_id")
 	if staffId == "" {
 		log.Printf("[SetAdminByStaffId] staff_id is empty")
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": "staff_id is empty",
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": "staff_id is empty",
+		// })
+		sendFail(c, 5001, "设置管理员失败")
 		return
 	}
 	if err := service.SetAdminByStaffId(c, staffId); err != nil {
 		log.Printf("[SetAdminByStaffId] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "设置管理员失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "设置管理员成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // SetNormalByStaffId 设置普通用户
@@ -174,21 +177,24 @@ func SetNormalByStaffId(c *gin.Context) {
 	staffId := c.Param("staff_id")
 	if staffId == "" {
 		log.Printf("[SetNormalByStaffId] staff_id is empty")
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": "staff_id is empty",
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": "staff_id is empty",
+		// })
+		sendFail(c, 5001, "设置普通用户失败")
 		return
 	}
 	if err := service.SetNormalByStaffId(c, staffId); err != nil {
 		log.Printf("[SetNormalByStaffId] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "设置普通用户失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "设置普通用户成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }

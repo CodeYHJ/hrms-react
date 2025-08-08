@@ -45,16 +45,18 @@ func DelSalary(c *gin.Context) {
 		// 记录错误日志
 		log.Printf("[DelSalary] err = %v", err)
 		// 返回错误信息
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败"+err.Error())
 		return
 	}
+	sendSuccess(c, nil, "删除成功")
 	// 返回成功信息
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 创建薪资信息
@@ -70,25 +72,28 @@ func CreateSalary(c *gin.Context) {
 	var dto model.SalaryCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[CreateSalary] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.CreateSalary(c, &dto)
 	if err != nil {
 		log.Printf("[CreateSalary] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "添加失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "添加成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 修改薪资信息
@@ -104,25 +109,28 @@ func UpdateSalaryById(c *gin.Context) {
 	var dto model.SalaryEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[UpdateSalaryById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.UpdateSalaryById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateSalaryById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "编辑失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "编辑成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 根据员工ID查询薪资信息
@@ -279,16 +287,16 @@ func PaySalaryRecordById(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		sendFail(c, 5001, "")
+		sendFail(c, 5001, "发放失败"+err.Error())
 		return
 	}
 	err = service.PaySalaryRecordById(c, int64(id))
 	if err != nil {
-		sendFail(c, 5002, "")
+		sendFail(c, 5002, "发放失败"+err.Error())
 
 		return
 	}
-	sendSuccess(c, nil, "")
+	sendSuccess(c, nil, "发放成功")
 
 }
 

@@ -58,14 +58,10 @@ const CandidateForm = () => {
     }
 
     if (response.status) {
-      message.success(isEdit ? "编辑候选人成功" : "添加候选人成功", () => {
-        if (isEdit) {
-          sessionStorage.removeItem("candidate_edit_info");
-        }
-        navigate("/candidate/manage");
-      });
-    } else {
-      message.error(response.message || (isEdit ? "编辑失败" : "添加失败"));
+      if (isEdit) {
+        sessionStorage.removeItem("candidate_edit_info");
+      }
+      navigate("/candidate/manage");
     }
     setLoading(false);
   };

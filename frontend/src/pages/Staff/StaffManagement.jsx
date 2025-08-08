@@ -200,7 +200,6 @@ const StaffManagement = () => {
   const handleDelete = async (record) => {
     const response = await staffService.deleteStaff(record.staff_id);
     if (response.status) {
-      message.success("删除成功");
       fetchStaffList(); // 重新加载列表
     }
   };

@@ -32,7 +32,7 @@ func DepartCreate(c *gin.Context) {
 	var departmentCreateDTO model.DepartmentCreateDTO
 	if err := c.BindJSON(&departmentCreateDTO); err != nil {
 		log.Printf("[handler.DepartCreate] err = %v", err)
-		sendFail(c, 5001, "创建部门失败:"+err.Error())
+		sendFail(c, 5001, "添加部门失败:"+err.Error())
 		return
 	}
 	var departmentCheck model.Department
@@ -41,7 +41,7 @@ func DepartCreate(c *gin.Context) {
 	resource.HrmsDB(c).Where("dep_name = ?", departmentCreateDTO.DepName).First(&departmentCheck)
 	if departmentCheck.DepName == departmentCreateDTO.DepName {
 		log.Printf("[HrmsDB.Create] 部门已存在, dep = %v", departmentCheck)
-		sendFail(c, 2001, "部门名称已存在")
+		sendFail(c, 2001, "部门已存在")
 		return
 	}
 	departmentCreate := model.Department{
@@ -53,16 +53,16 @@ func DepartCreate(c *gin.Context) {
 		result.Rollback()
 		log.Printf("[HrmsDB.Create] err = %v", result.Error)
 
-		sendFail(c, 5001, "创建部门失败:"+result.Error.Error())
+		sendFail(c, 5001, "添加部门失败:"+result.Error.Error())
 		return
 	}
 	if result = resource.HrmsDB(c).Where("id = ?", departmentCreate.ID); result.Error != nil {
 		log.Printf("[HrmsDB.Create] 插入数据失败， departmentCreate = %v", departmentCreate)
 
-		sendFail(c, 5001, "创建部门失败:"+result.Error.Error())
+		sendFail(c, 5001, "添加部门失败:"+result.Error.Error())
 		return
 	}
-	sendSuccess(c, departmentCreate, "创建部门成功")
+	sendSuccess(c, departmentCreate, "添加部门成功")
 }
 
 // 删除部门
@@ -77,7 +77,7 @@ func DepartDel(c *gin.Context) {
 	if err := resource.HrmsDB(c).Where("dep_id = ?", depId).Delete(&model.Department{}).Error; err != nil {
 		log.Printf("[DepartDel] err = %v", err)
 
-		sendFail(c, 5001, "删除部门失败"+err.Error())
+		sendFail(c, 5001, "删除失败"+err.Error())
 		return
 	}
 

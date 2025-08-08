@@ -175,10 +175,7 @@ const AttendanceManagement = () => {
           record.attendance_id
         );
         if (response.status) {
-          message.success("删除考勤记录成功");
           loadAttendances(searchValue, pagination.current);
-        } else {
-          message.error(response.message || "删除失败");
         }
       },
     });

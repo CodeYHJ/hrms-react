@@ -250,10 +250,7 @@ const CandidateManagement = () => {
       onOk: async () => {
         const response = await candidateService.deleteCandidate(candidate_id);
         if (response.status) {
-          message.success("删除候选人成功");
           loadCandidates(searchValue, pagination.current);
-        } else {
-          message.error(response.message || "删除失败");
         }
       },
     });

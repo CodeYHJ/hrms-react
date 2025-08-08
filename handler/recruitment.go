@@ -31,25 +31,28 @@ func CreateRecruitment(c *gin.Context) {
 	var dto model.RecruitmentCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[CreateRecruitment] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.CreateRecruitment(c, &dto)
 	if err != nil {
 		log.Printf("[CreateRecruitment] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "添加招聘信息成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 删除招聘信息
@@ -66,15 +69,17 @@ func DelRecruitmentByRecruitmentId(c *gin.Context) {
 	err := service.DelRecruitmentByRecruitmentId(c, recruitmentId)
 	if err != nil {
 		log.Printf("[DelRecruitmentByRecruitmentId] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "删除招聘信息成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 更新招聘信息
@@ -89,25 +94,28 @@ func UpdateRecruitmentById(c *gin.Context) {
 	var dto model.RecruitmentEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[UpdateRecruitmentById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.UpdateRecruitmentById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateRecruitmentById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "编辑失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "编辑招聘信息成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 查询招聘信息

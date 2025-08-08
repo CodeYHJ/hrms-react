@@ -41,8 +41,10 @@ const ExamInfo = () => {
   // 获取考试列表
   const fetchExamList = async (searchValue = "") => {
     setLoading(true);
-    const response = await (searchValue ? examService.searchExamByName(searchValue) : examService.getAllExams());
-      
+    const response = await (searchValue
+      ? examService.searchExamByName(searchValue)
+      : examService.getAllExams());
+
     if (response.status) {
       setExamList(response.data || []);
       setPagination((prev) => ({
@@ -59,18 +61,15 @@ const ExamInfo = () => {
   // 删除考试
   const handleDelete = async (record) => {
     const response = await examService.deleteExam(record.example_id);
-      
+
     if (response.status) {
-      message.success("删除成功");
       fetchExamList(searchValue);
-    } else {
-      message.error(response.message || "删除失败");
     }
   };
 
   // 开始考试
   const handleStartExam = (record) => {
-    window.open(`/example/render_example/${record.example_id}`, '_blank');
+    window.open(`/example/render_example/${record.example_id}`, "_blank");
   };
 
   // 打开新增模态框
@@ -135,14 +134,14 @@ const ExamInfo = () => {
       dataIndex: "limit",
       key: "limit",
       width: 130,
-      fixed: 'right',
+      fixed: "right",
     },
     {
       title: "考试日期",
       dataIndex: "date",
       key: "date",
       width: 130,
-      fixed: 'right',
+      fixed: "right",
       render: (text) => (text ? text.slice(0, 10) : "-"),
     },
     {
@@ -284,13 +283,12 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
 
   const handleSubmit = async (values) => {
     setLoading(true);
-    const response = await (type === "add" ? examService.createExam(values) : examService.editExam(values));
-      
+    const response = await (type === "add"
+      ? examService.createExam(values)
+      : examService.editExam(values));
+
     if (response.status) {
-      message.success(type === "add" ? "添加成功" : "编辑成功");
       onSuccess();
-    } else {
-      message.error(response.message || "操作失败");
     }
     setLoading(false);
   };
@@ -309,7 +307,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input placeholder="请输入考试名称" />
       </Form.Item>
-      
+
       <Form.Item
         label="考试介绍"
         name="describe"
@@ -317,7 +315,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input.TextArea placeholder="请输入考试介绍" rows={4} />
       </Form.Item>
-      
+
       <Form.Item
         label="限制时间(分钟)"
         name="limit"
@@ -325,7 +323,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input type="number" placeholder="请输入限制时间" />
       </Form.Item>
-      
+
       <Form.Item
         label="考试日期"
         name="date"
@@ -333,7 +331,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input type="date" placeholder="请输入考试日期" />
       </Form.Item>
-      
+
       <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
         <Space>
           <Button onClick={onCancel}>取消</Button>

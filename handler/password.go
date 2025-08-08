@@ -116,6 +116,6 @@ func PasswordEdit(c *gin.Context) {
 		sendFail(c, 5000, err.Error())
 		return
 	}
-	sendSuccess(c, nil, "修改密码成功")
+	sendSuccess(c, nil, "密码修改成功")
 
 }

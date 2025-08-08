@@ -46,8 +46,8 @@ const ExamManagement = () => {
   // 获取考试列表
   const fetchExamList = async () => {
     setLoading(true);
-    const response = await api.get('/example/query/all');
-    
+    const response = await api.get("/example/query/all");
+
     if (response.status) {
       setExamList(response.data || []);
       setPagination((prev) => ({
@@ -64,8 +64,8 @@ const ExamManagement = () => {
   // 获取考试历史记录
   const fetchExamHistory = async () => {
     setLoading(true);
-    const response = await api.get('/example_score/query_by_name/all');
-    
+    const response = await api.get("/example_score/query_by_name/all");
+
     if (response.status) {
       setExamHistory(response.data || []);
       setPagination((prev) => ({
@@ -82,22 +82,19 @@ const ExamManagement = () => {
   // 删除考试
   const handleDelete = async (record, type) => {
     const response = await api.delete(`/example/delete/${record.example_id}`);
-    
+
     if (response.status) {
-      message.success("删除成功");
       if (activeTab === "manage") {
         fetchExamList();
       } else if (activeTab === "history") {
         fetchExamHistory();
       }
-    } else {
-      message.error(response.message || "删除失败");
     }
   };
 
   // 开始考试
   const handleStartExam = (record) => {
-    window.open(`/example/render_example/${record.example_id}`, '_blank');
+    window.open(`/example/render_example/${record.example_id}`, "_blank");
   };
 
   // 打开新增模态框
@@ -311,7 +308,11 @@ const ExamManagement = () => {
             key="manage"
           >
             <div style={{ marginBottom: 16 }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+              >
                 添加考试
               </Button>
             </div>
@@ -327,7 +328,7 @@ const ExamManagement = () => {
               scroll={{ x: 1000 }}
             />
           </TabPane>
-          
+
           <TabPane
             tab={
               <span>
@@ -385,13 +386,13 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
 
   const handleSubmit = async (values) => {
     setLoading(true);
-    const response = await api.post(`/example/${type === "add" ? "create" : "edit"}`, values);
-    
+    const response = await api.post(
+      `/example/${type === "add" ? "create" : "edit"}`,
+      values
+    );
+
     if (response.status) {
-      message.success(type === "add" ? "添加成功" : "编辑成功");
       onSuccess();
-    } else {
-      message.error(response.message || "操作失败");
     }
     setLoading(false);
   };
@@ -410,7 +411,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input placeholder="请输入考试名称" />
       </Form.Item>
-      
+
       <Form.Item
         label="考试描述"
         name="example_describe"
@@ -418,7 +419,7 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input.TextArea placeholder="请输入考试描述" rows={4} />
       </Form.Item>
-      
+
       <Form.Item
         label="考试内容"
         name="example_content"
@@ -426,18 +427,14 @@ const ExamForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input.TextArea placeholder="请输入考试内容（JSON格式）" rows={6} />
       </Form.Item>
-      
-      <Form.Item
-        label="状态"
-        name="status"
-        initialValue="active"
-      >
+
+      <Form.Item label="状态" name="status" initialValue="active">
         <select>
           <option value="active">启用</option>
           <option value="inactive">禁用</option>
         </select>
       </Form.Item>
-      
+
       <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
         <Space>
           <Button onClick={onCancel}>取消</Button>

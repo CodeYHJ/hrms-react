@@ -47,7 +47,7 @@ const AuthorityManagement = () => {
   const fetchStaffList = async (params = {}) => {
     setLoading(true);
     const response = await staffService.getAllStaff();
-    
+
     if (response.status) {
       setStaffList(response.data || []);
       setPagination((prev) => ({
@@ -64,24 +64,18 @@ const AuthorityManagement = () => {
   // 设置管理员
   const handleSetAdmin = async (record) => {
     const response = await staffService.authority.setAdmin(record.staff_id);
-    
+
     if (response.status) {
-      message.success("设置管理员成功");
       fetchStaffList();
-    } else {
-      message.error(response.data || "设置管理员失败");
     }
   };
 
   // 设置普通用户
   const handleSetNormal = async (record) => {
     const response = await staffService.authority.setNormal(record.staff_id);
-    
+
     if (response.status) {
-      message.success("设置普通用户成功");
       fetchStaffList();
-    } else {
-      message.error(response.data || "设置普通用户失败");
     }
   };
 
@@ -95,7 +89,7 @@ const AuthorityManagement = () => {
 
     setLoading(true);
     const response = await staffService.searchStaffByName(keyword.trim());
-    
+
     if (response.status) {
       setStaffList(response.data || []);
       setPagination((prev) => ({
@@ -214,7 +208,11 @@ const AuthorityManagement = () => {
               <Input placeholder="请输入员工姓名" style={{ width: 200 }} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                icon={<SearchOutlined />}
+              >
                 搜索
               </Button>
             </Form.Item>

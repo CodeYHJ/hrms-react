@@ -31,17 +31,17 @@ func CreateNotification(c *gin.Context) {
 	var notificationDTO model.NotificationDTO
 	if err := c.BindJSON(&notificationDTO); err != nil {
 		log.Printf("[CreateNotification] err = %v", err)
-		sendFail(c, 5001, err.Error())
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.CreateNotification(c, &notificationDTO)
 	if err != nil {
 		log.Printf("[CreateNotification] err = %v", err)
-		sendFail(c, 5002, err.Error())
+		sendFail(c, 5002, "添加失败"+err.Error())
 		return
 	}
-	sendSuccess(c, nil, "")
+	sendSuccess(c, nil, "添加成功")
 
 }
 
@@ -59,15 +59,17 @@ func DeleteNotificationById(c *gin.Context) {
 	err := service.DelNotificationById(c, noticeId)
 	if err != nil {
 		log.Printf("[DeleteNotificationById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败"+err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "删除成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // 查询通知
@@ -105,16 +107,16 @@ func UpdateNotificationById(c *gin.Context) {
 	var dto model.NotificationEditDTO
 	if err := c.BindJSON(&dto); err != nil {
 		log.Printf("[UpdateNotificationById] err = %v", err)
-		sendFail(c, 5001, err.Error())
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	// 业务处理
 	err := service.UpdateNotificationById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateNotificationById] err = %v", err)
-		sendFail(c, 5002, err.Error())
+		sendFail(c, 5002, "编辑失败"+err.Error())
 		return
 	}
-	sendSuccess(c, nil, "修改通知成功")
+	sendSuccess(c, nil, "编辑成功")
 
 }

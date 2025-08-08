@@ -221,10 +221,7 @@ const RecruitmentInfo = () => {
           recruitment_id
         );
         if (response.status) {
-          message.success("删除招聘信息成功");
           loadRecruitments(searchValue, pagination.current);
-        } else {
-          message.error(response.message || "删除失败");
         }
       },
     });

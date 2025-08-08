@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Table, Card, Button, Space, message, Tag, Popconfirm } from "antd";
-import { CheckOutlined, CloseOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  CheckOutlined,
+  CloseOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import { usePermission } from "../../components/Auth/usePermission";
 import { attendanceService } from "../../services/attendance";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
@@ -97,11 +101,7 @@ const AttendanceApproval = () => {
                 okText="确定"
                 cancelText="取消"
               >
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<CheckOutlined />}
-                >
+                <Button type="primary" size="small" icon={<CheckOutlined />}>
                   通过
                 </Button>
               </Popconfirm>
@@ -131,7 +131,7 @@ const AttendanceApproval = () => {
   const loadData = async () => {
     setLoading(true);
     const response = await attendanceService.getAllAttendanceForApproval();
-    
+
     if (response.status) {
       const listData = Array.isArray(response.data) ? response.data : [];
       setData(listData);
@@ -159,12 +159,9 @@ const AttendanceApproval = () => {
     } else {
       response = await attendanceService.rejectAttendance(attendanceId);
     }
-    
+
     if (response.status) {
-      message.success(isApprove ? "审批通过成功" : "审批拒绝成功");
       loadData(); // 重新加载数据
-    } else {
-      message.error(response.data || "审批操作失败");
     }
   };
 
@@ -181,11 +178,11 @@ const AttendanceApproval = () => {
   return (
     <div>
       {/* 考勤审批列表 */}
-      <Card 
-        title="考勤审批" 
+      <Card
+        title="考勤审批"
         extra={
-          <Button 
-            icon={<ReloadOutlined />} 
+          <Button
+            icon={<ReloadOutlined />}
             onClick={handleRefresh}
             loading={loading}
           >

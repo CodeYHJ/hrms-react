@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Table, Card, Form, Input, Button, message, Space, Popconfirm } from "antd";
-import { SearchOutlined, ReloadOutlined, EyeOutlined, DollarOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Card,
+  Form,
+  Input,
+  Button,
+  message,
+  Space,
+  Popconfirm,
+} from "antd";
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  EyeOutlined,
+  DollarOutlined,
+} from "@ant-design/icons";
 import { usePermission } from "../../components/Auth/usePermission";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
 import { salaryService } from "../../services/salary";
@@ -187,7 +201,7 @@ const SalaryGiving = () => {
   const loadData = async (staffId = null) => {
     setLoading(true);
     const response = await salaryService.getAllSalaryRecords(staffId);
-    
+
     if (response.status) {
       const listData = Array.isArray(response.data) ? response.data : [];
       setData(listData);
@@ -229,18 +243,15 @@ const SalaryGiving = () => {
     // 存储数据到localStorage供详情页面使用
     localStorage.setItem("salary_giving_info", JSON.stringify(record));
     // 打开新窗口显示详情
-    window.open('/views/salary_giving_detail.html', '_blank');
+    window.open("/views/salary_giving_detail.html", "_blank");
   };
 
   // 发放薪资
   const handlePay = async (id, _salaryRecordId) => {
     const response = await salaryService.paySalary(id);
-    
+
     if (response.status) {
-      message.success("发放成功");
       loadData(); // 重新加载数据
-    } else {
-      message.error(response.data || "发放失败");
     }
   };
 
@@ -285,11 +296,11 @@ const SalaryGiving = () => {
       </Card>
 
       {/* 工资发放列表 */}
-      <Card 
-        title="工资发放管理" 
+      <Card
+        title="工资发放管理"
         extra={
-          <Button 
-            icon={<ReloadOutlined />} 
+          <Button
+            icon={<ReloadOutlined />}
             onClick={handleRefresh}
             loading={loading}
           >

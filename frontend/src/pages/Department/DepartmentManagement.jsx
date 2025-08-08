@@ -82,10 +82,7 @@ const DepartmentManagement = () => {
   const handleDelete = async (record) => {
     const response = await departmentService.deleteDepartment(record.dep_id);
     if (response.status) {
-      message.success("删除部门成功");
       fetchDepartments(); // 重新加载列表
-    } else {
-      message.error(response.message || "删除失败");
     }
   };
 

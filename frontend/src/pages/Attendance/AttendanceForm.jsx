@@ -57,14 +57,10 @@ const AttendanceForm = () => {
     }
 
     if (response.status) {
-      message.success(isEdit ? "编辑考勤信息成功" : "上报考勤信息成功", () => {
-        if (isEdit) {
-          sessionStorage.removeItem("attendance_edit_info");
-        }
-        navigate("/attendance/manage");
-      });
-    } else {
-      message.error(response.message || (isEdit ? "编辑失败" : "上报失败"));
+      if (isEdit) {
+        sessionStorage.removeItem("attendance_edit_info");
+      }
+      navigate("/attendance/manage");
     }
     setLoading(false);
   };

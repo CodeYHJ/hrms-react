@@ -88,9 +88,7 @@ const StaffForm = ({ visible, onCancel, onSuccess, editData = null }) => {
     // 格式化数据
     const formData = {
       ...values,
-      birthday_str: values.birthday
-        ? values.birthday.format("YYYY-MM-DD")
-        : "",
+      birthday_str: values.birthday ? values.birthday.format("YYYY-MM-DD") : "",
       entry_date_str: values.entry_date
         ? values.entry_date.format("YYYY-MM-DD")
         : "",
@@ -113,11 +111,8 @@ const StaffForm = ({ visible, onCancel, onSuccess, editData = null }) => {
     }
 
     if (response.status) {
-      message.success(isEdit ? "编辑成功" : "添加成功");
       form.resetFields();
       onSuccess();
-    } else {
-      message.error(response.message || (isEdit ? "编辑失败" : "添加失败"));
     }
     setLoading(false);
   };
@@ -244,15 +239,17 @@ const StaffForm = ({ visible, onCancel, onSuccess, editData = null }) => {
                 }
                 onChange={(value) => {
                   if (value) {
-                    const selectedStaff = staffList.find(staff => staff.staff_id === value);
+                    const selectedStaff = staffList.find(
+                      (staff) => staff.staff_id === value
+                    );
                     if (selectedStaff) {
                       form.setFieldsValue({
-                        leader_name: selectedStaff.staff_name
+                        leader_name: selectedStaff.staff_name,
                       });
                     }
                   } else {
                     form.setFieldsValue({
-                      leader_name: ''
+                      leader_name: "",
                     });
                   }
                 }}

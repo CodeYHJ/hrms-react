@@ -39,25 +39,28 @@ func CreateAttendRecord(c *gin.Context) {
 	var dto model.AttendanceRecordCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[CreateAttendRecord] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "上报失败")
 		return
 	}
 	// 业务处理
 	err := service.CreateAttendanceRecord(c, &dto)
 	if err != nil {
 		log.Printf("[CreateAttendRecord] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "上报失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "上报考勤信息成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // UpdateAttendRecordById godoc
@@ -73,25 +76,28 @@ func UpdateAttendRecordById(c *gin.Context) {
 	var dto model.AttendanceRecordEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
 		log.Printf("[UpdateAttendRecordById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5001,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5001,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5001, "编辑失败")
 		return
 	}
 	// 业务处理
 	err := service.UpdateAttendRecordById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateSalaryRecordById] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "编辑失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "编辑考勤信息成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // GetAttendRecordByStaffId godoc
@@ -154,15 +160,17 @@ func DelAttendRecordByAttendId(c *gin.Context) {
 	err := service.DelAttendRecordByAttendId(c, attendanceId)
 	if err != nil {
 		log.Printf("[DelAttendRecord] err = %v", err)
-		c.JSON(200, gin.H{
-			"status": 5002,
-			"result": err.Error(),
-		})
+		// c.JSON(200, gin.H{
+		// 	"status": 5002,
+		// 	"result": err.Error(),
+		// })
+		sendFail(c, 5002, "删除失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "删除考勤记录成功")
+	// c.JSON(200, gin.H{
+	// 	"status": 2000,
+	// })
 }
 
 // GetAttendRecordIsPayByStaffIdAndDate godoc
@@ -214,11 +222,11 @@ func ApproveAccept(c *gin.Context) {
 			"status": 5000,
 			"err":    err,
 		})
+		sendFail(c, 5000, "审批操作失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "审批通过成功")
+
 }
 
 // ApproveReject godoc
@@ -231,13 +239,9 @@ func ApproveAccept(c *gin.Context) {
 func ApproveReject(c *gin.Context) {
 	attendId := c.Param("attendId")
 	if err := resource.HrmsDB(c).Model(&model.AttendanceRecord{}).Where("attendance_id = ?", attendId).Update("approve", 2).Error; err != nil {
-		c.JSON(200, gin.H{
-			"status": 5000,
-			"err":    err,
-		})
+		sendFail(c, 5000, "审批操作失败")
 		return
 	}
-	c.JSON(200, gin.H{
-		"status": 2000,
-	})
+	sendSuccess(c, nil, "审批拒绝成功")
+
 }

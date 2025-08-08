@@ -47,7 +47,7 @@ const SalaryManagement = () => {
   const fetchSalaryGiving = async () => {
     setLoading(true);
     const response = await salaryService.getAllSalary();
-    
+
     if (response.status) {
       setSalaryList(response.data || []);
       setPagination((prev) => ({
@@ -65,7 +65,7 @@ const SalaryManagement = () => {
   const fetchSalaryDetails = async () => {
     setLoading(true);
     const response = await salaryService.getAllSalary();
-    
+
     if (response.status) {
       setSalaryDetails(response.data || []);
       setPagination((prev) => ({
@@ -83,7 +83,7 @@ const SalaryManagement = () => {
   const fetchSalaryHistory = async () => {
     setLoading(true);
     const response = await salaryService.getAllSalaryRecords();
-    
+
     if (response.status) {
       setSalaryHistory(response.data || []);
       setPagination((prev) => ({
@@ -100,9 +100,8 @@ const SalaryManagement = () => {
   // 删除工资记录
   const handleDelete = async (record, type) => {
     const response = await salaryService.deleteSalary(record.salary_id);
-    
+
     if (response.status) {
-      message.success("删除成功");
       if (activeTab === "giving") {
         fetchSalaryGiving();
       } else if (activeTab === "detail") {
@@ -110,8 +109,6 @@ const SalaryManagement = () => {
       } else if (activeTab === "history") {
         fetchSalaryHistory();
       }
-    } else {
-      message.error(response.message || "删除失败");
     }
   };
 
@@ -397,7 +394,11 @@ const SalaryManagement = () => {
             key="giving"
           >
             <div style={{ marginBottom: 16 }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+              >
                 添加发放记录
               </Button>
             </div>
@@ -413,7 +414,7 @@ const SalaryManagement = () => {
               scroll={{ x: 800 }}
             />
           </TabPane>
-          
+
           <TabPane
             tab={
               <span>
@@ -424,7 +425,11 @@ const SalaryManagement = () => {
             key="detail"
           >
             <div style={{ marginBottom: 16 }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+              >
                 添加套账
               </Button>
             </div>
@@ -440,7 +445,7 @@ const SalaryManagement = () => {
               scroll={{ x: 800 }}
             />
           </TabPane>
-          
+
           <TabPane
             tab={
               <span>
@@ -504,12 +509,9 @@ const SalaryForm = ({ type, initialValues, onSuccess, onCancel }) => {
     } else {
       response = await salaryService.editSalary(values);
     }
-    
+
     if (response.status) {
-      message.success(type === "add" ? "添加成功" : "编辑成功");
       onSuccess();
-    } else {
-      message.error(response.message || "操作失败");
     }
     setLoading(false);
   };
@@ -528,7 +530,7 @@ const SalaryForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input placeholder="请输入员工工号" />
       </Form.Item>
-      
+
       <Form.Item
         label="基本工资"
         name="base_salary"
@@ -536,14 +538,11 @@ const SalaryForm = ({ type, initialValues, onSuccess, onCancel }) => {
       >
         <Input type="number" placeholder="请输入基本工资" />
       </Form.Item>
-      
-      <Form.Item
-        label="绩效工资"
-        name="performance_salary"
-      >
+
+      <Form.Item label="绩效工资" name="performance_salary">
         <Input type="number" placeholder="请输入绩效工资" />
       </Form.Item>
-      
+
       <Form.Item style={{ marginBottom: 0, textAlign: "right" }}>
         <Space>
           <Button onClick={onCancel}>取消</Button>

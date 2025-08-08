@@ -44,17 +44,17 @@ func StaffCreate(c *gin.Context) {
 	var staffCreateDto model.StaffCreateDTO
 	if err := c.BindJSON(&staffCreateDto); err != nil {
 		log.Printf("[StaffCreate] err = %v", err)
-		sendFail(c, 5001, err.Error())
+		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
 	log.Printf("[StaffCreate staff = %v]", staffCreateDto)
 	// 创建员工信息落表
 	if staff, err := buildStaffInfoSaveDB(c, staffCreateDto); err != nil {
 		log.Printf("[StaffCreate err = %v]", err)
-		sendFail(c, 5001, err.Error())
+		sendFail(c, 5001, "添加失败"+err.Error())
 
 	} else {
-		sendSuccess(c, staff, "新增员工信息成功")
+		sendSuccess(c, staff, "添加员工信息成功")
 	}
 }
 
@@ -121,10 +121,11 @@ func StaffEdit(c *gin.Context) {
 	var staffEditDTO model.StaffEditDTO
 	if err := c.BindJSON(&staffEditDTO); err != nil {
 		log.Printf("[StaffEdit] err = %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  false,
-			"message": err, "data": nil, "code": 5001,
-		})
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"status":  false,
+		// 	"message": err, "data": nil, "code": 5001,
+		// })
+		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	log.Printf("[StaffEdit staff = %v]", staffEditDTO)
@@ -153,11 +154,12 @@ func StaffEdit(c *gin.Context) {
 	staff.LeaderName = leader.StaffName
 	resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", staffEditDTO.StaffId).
 		Updates(&staff)
-	c.JSON(200, gin.H{
-		"status": true,
-		"code":   2000,
-		"data":   nil,
-	})
+	sendSuccess(c, staff, "编辑成功")
+	// c.JSON(200, gin.H{
+	// 	"status": true,
+	// 	"code":   2000,
+	// 	"data":   nil,
+	// })
 }
 
 // 根据员工ID查询员工信息
@@ -325,16 +327,17 @@ func StaffDel(c *gin.Context) {
 			"status":  false,
 			"message": err, "data": nil, "code": 5001,
 		})
+		sendFail(c, 5001, "删除失败"+err.Error())
 		return
 	}
 	// 密码删除
 	if err := resource.HrmsDB(c).Where("staff_id = ?", staffId).Delete(&model.Authority{}).Error; err != nil {
 		log.Printf("[StaffDel] err = %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  false,
-			"message": err, "data": nil, "code": 5001,
-		})
-
+		// c.JSON(http.StatusInternalServerError, gin.H{
+		// 	"status":  false,
+		// 	"message": err, "data": nil, "code": 5001,
+		// })
+		sendFail(c, 5001, "删除失败"+err.Error())
 		return
 	}
 	sendSuccess(c, nil, "删除成功")

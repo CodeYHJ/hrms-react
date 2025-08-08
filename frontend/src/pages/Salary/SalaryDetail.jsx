@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Table, Card, Form, Input, Button, message, Space, Popconfirm } from "antd";
-import { SearchOutlined, ReloadOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Card,
+  Form,
+  Input,
+  Button,
+  message,
+  Space,
+  Popconfirm,
+} from "antd";
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { usePermission } from "../../components/Auth/usePermission";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
 import { salaryService } from "../../services/salary";
@@ -130,7 +145,7 @@ const SalaryDetail = () => {
   const loadData = async (staffId = null) => {
     setLoading(true);
     const response = await salaryService.getAllSalary(staffId);
-    
+
     if (response.status) {
       const listData = Array.isArray(response.data) ? response.data : [];
       setData(listData);
@@ -170,24 +185,21 @@ const SalaryDetail = () => {
   // 编辑
   const handleEdit = (record) => {
     localStorage.setItem("salary_edit_info", JSON.stringify(record));
-    window.open('/views/salary_detail_edit.html', '_blank');
+    window.open("/views/salary_detail_edit.html", "_blank");
   };
 
   // 删除
   const handleDelete = async (salaryId) => {
     const response = await salaryService.deleteSalary(salaryId);
-    
+
     if (response.status) {
-      message.success("删除成功");
       loadData(); // 重新加载数据
-    } else {
-      message.error(response.data || "删除失败");
     }
   };
 
   // 添加
   const handleAdd = () => {
-    window.open('/views/salary_detail_add.html', '_blank');
+    window.open("/views/salary_detail_add.html", "_blank");
   };
 
   // 刷新数据
@@ -231,21 +243,21 @@ const SalaryDetail = () => {
       </Card>
 
       {/* 工资套账列表 */}
-      <Card 
-        title="工资套账管理" 
+      <Card
+        title="工资套账管理"
         extra={
           <Space>
             {hasPermission("salary.create") && (
-              <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
                 onClick={handleAdd}
               >
                 添加套账
               </Button>
             )}
-            <Button 
-              icon={<ReloadOutlined />} 
+            <Button
+              icon={<ReloadOutlined />}
               onClick={handleRefresh}
               loading={loading}
             >

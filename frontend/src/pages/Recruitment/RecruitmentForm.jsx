@@ -58,14 +58,10 @@ const RecruitmentForm = () => {
     }
 
     if (response.status) {
-      message.success(isEdit ? "编辑招聘信息成功" : "添加招聘信息成功", () => {
-        if (isEdit) {
-          sessionStorage.removeItem("recruitment_edit_info");
-        }
-        navigate("/recruitment/manage");
-      });
-    } else {
-      message.error(response.message || (isEdit ? "编辑失败" : "添加失败"));
+      if (isEdit) {
+        sessionStorage.removeItem("recruitment_edit_info");
+      }
+      navigate("/recruitment/manage");
     }
     setLoading(false);
   };

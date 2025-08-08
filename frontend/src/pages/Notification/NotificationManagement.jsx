@@ -104,10 +104,7 @@ const NotificationManagement = () => {
     );
 
     if (response.status) {
-      message.success("删除成功");
       fetchNotificationList(); // 重新加载列表
-    } else {
-      message.error(response.message || "删除失败");
     }
   };
 
@@ -369,10 +366,7 @@ const NotificationForm = ({ type, initialValues, onSuccess, onCancel }) => {
       : notificationService.editNotification(values));
 
     if (response.status) {
-      message.success(type === "add" ? "添加成功" : "编辑成功");
       onSuccess();
-    } else {
-      message.error(response.message || "操作失败");
     }
     setLoading(false);
   };

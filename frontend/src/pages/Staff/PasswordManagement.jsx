@@ -118,7 +118,6 @@ const PasswordManagement = () => {
     });
 
     if (response.status) {
-      message.success("密码修改成功");
       setEditModalVisible(false);
       setEditingStaff(null);
       fetchPasswordList(); // 重新加载列表
@@ -243,10 +242,10 @@ const PasswordManagement = () => {
       >
         <Form form={editForm} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item label="员工工号">
-            <Input value={editingStaff?.StaffId} disabled />
+            <Input value={editingStaff?.staff_id} disabled />
           </Form.Item>
           <Form.Item label="员工姓名">
-            <Input value={editingStaff?.StaffName} disabled />
+            <Input value={editingStaff?.staff_name} disabled />
           </Form.Item>
           <Form.Item
             label="新密码"

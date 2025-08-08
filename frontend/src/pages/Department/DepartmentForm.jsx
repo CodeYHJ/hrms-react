@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button, message, Space } from "antd";
+import { Form, Input, Button, Space } from "antd";
 import { departmentService } from "../../services/department";
 
 const DepartmentForm = ({ type, initialValues, onSuccess, onCancel }) => {
@@ -21,17 +21,7 @@ const DepartmentForm = ({ type, initialValues, onSuccess, onCancel }) => {
     }
 
     if (response.status) {
-      message.success(type === "add" ? "添加部门成功" : "编辑部门成功");
       onSuccess();
-    } else {
-      // 处理特定的错误状态
-      if (response.message?.includes("已存在") || response.message?.includes("存在")) {
-        message.error("部门已存在");
-      } else {
-        message.error(
-          response.message || (type === "add" ? "添加失败" : "编辑失败")
-        );
-      }
     }
   };
 
