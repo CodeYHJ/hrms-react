@@ -243,7 +243,7 @@ const SalaryGiving = () => {
     // 存储数据到localStorage供详情页面使用
     localStorage.setItem("salary_giving_info", JSON.stringify(record));
     // 打开新窗口显示详情
-    window.open("/views/salary_giving_detail.html", "_blank");
+    window.open("/app/salary_giving_detail.html", "_blank");
   };
 
   // 发放薪资

@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Table, Card, Form, Input, Button, message, Space } from "antd";
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
 import { usePermission } from "../../components/Auth/usePermission";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
 import { salaryService } from "../../services/salary";
-
-const { Search } = Input;
 
 const SalaryHistory = () => {
   const [form] = Form.useForm();
@@ -172,7 +170,7 @@ const SalaryHistory = () => {
   const loadData = async (staffId = null) => {
     setLoading(true);
     const response = await salaryService.getAllSalaryHistory(staffId);
-    
+
     if (response.status) {
       const listData = Array.isArray(response.data) ? response.data : [];
       setData(listData);
@@ -212,7 +210,7 @@ const SalaryHistory = () => {
   // 查看详情
   const handleView = (record) => {
     localStorage.setItem("salary_giving_info", JSON.stringify(record));
-    window.open('/views/salary_giving_detail.html', '_blank');
+    window.open("/app/salary_giving_detail.html", "_blank");
   };
 
   // 刷新数据
@@ -256,11 +254,11 @@ const SalaryHistory = () => {
       </Card>
 
       {/* 工资历史列表 */}
-      <Card 
-        title="工资发放历史" 
+      <Card
+        title="工资发放历史"
         extra={
-          <Button 
-            icon={<ReloadOutlined />} 
+          <Button
+            icon={<ReloadOutlined />}
             onClick={handleRefresh}
             loading={loading}
           >
