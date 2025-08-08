@@ -220,6 +220,88 @@ const MainLayout = ({ children }) => {
     navigate(key);
   };
 
+  // 获取默认展开的菜单key
+  const getDefaultOpenKeys = () => {
+    const pathname = location.pathname;
+    const openKeys = [];
+    
+    // 根据当前路径确定需要展开的父级菜单
+    if (pathname.startsWith('/staff/')) {
+      openKeys.push('/staff');
+    }
+    if (pathname.startsWith('/attendance/')) {
+      openKeys.push('/attendance');
+    }
+    if (pathname.startsWith('/salary/')) {
+      openKeys.push('/salary');
+    }
+    if (pathname.startsWith('/recruitment/') || pathname.startsWith('/candidate/')) {
+      openKeys.push('/recruitment');
+    }
+    if (pathname.startsWith('/exam/')) {
+      openKeys.push('/exam');
+    }
+    if (pathname.startsWith('/authority/')) {
+      openKeys.push('/authority');
+    }
+    
+    return openKeys;
+  };
+
+  // 获取正确的选中key，处理子路由情况
+  const getSelectedKey = () => {
+    const pathname = location.pathname;
+    
+    // 精确匹配
+    const exactMatch = menuItems.find(item => 
+      item.key === pathname || 
+      (item.children && item.children.some(child => child.key === pathname))
+    );
+    
+    if (exactMatch) {
+      if (exactMatch.children) {
+        const childMatch = exactMatch.children.find(child => child.key === pathname);
+        return childMatch ? [childMatch.key] : [pathname];
+      }
+      return [exactMatch.key];
+    }
+    
+    // 处理动态路由和子路由
+    if (pathname.startsWith('/staff/')) {
+      if (pathname.startsWith('/staff/info')) return ['/staff/info'];
+      if (pathname.startsWith('/staff/password')) return ['/staff/password'];
+    }
+    if (pathname.startsWith('/attendance/')) {
+      if (pathname.startsWith('/attendance/record')) return ['/attendance/record'];
+      if (pathname.startsWith('/attendance/history')) return ['/attendance/history'];
+      if (pathname.startsWith('/attendance/approve')) return ['/attendance/approve'];
+    }
+    if (pathname.startsWith('/salary/')) {
+      if (pathname.startsWith('/salary/giving')) return ['/salary/giving'];
+      if (pathname.startsWith('/salary/detail')) return ['/salary/detail'];
+      if (pathname.startsWith('/salary/history')) return ['/salary/history'];
+    }
+    if (pathname.startsWith('/recruitment/')) {
+      if (pathname.startsWith('/recruitment/manage')) return ['/recruitment/manage'];
+      if (pathname.startsWith('/recruitment/add')) return ['/recruitment/manage'];
+      if (pathname.startsWith('/recruitment/edit')) return ['/recruitment/manage'];
+      if (pathname.startsWith('/recruitment/detail')) return ['/recruitment/manage'];
+    }
+    if (pathname.startsWith('/candidate/')) {
+      return ['/candidate/manage'];
+    }
+    if (pathname.startsWith('/exam/')) {
+      if (pathname.startsWith('/exam/manage')) return ['/exam/manage'];
+      if (pathname.startsWith('/exam/history')) return ['/exam/history'];
+    }
+    if (pathname.startsWith('/authority/')) {
+      if (pathname.startsWith('/authority/admin')) return ['/authority/admin'];
+      if (pathname.startsWith('/authority/role')) return ['/authority/role'];
+    }
+    
+    return [pathname];
+  };
+
   return (
     <Layout className="main-layout">
       <Sider trigger={null} collapsible collapsed={collapsed}>
@@ -238,13 +320,21 @@ const MainLayout = ({ children }) => {
         >
           {collapsed ? "HRMS" : "人力资源管理系统"}
         </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={menuItems}
-          onClick={handleMenuClick}
-        />
+        <div style={{ 
+          height: 'calc(100vh - 64px)', 
+          overflowY: 'auto',
+          overflowX: 'hidden'
+        }}>
+          <Menu
+            theme="dark"
+            mode="inline"
+            selectedKeys={getSelectedKey()}
+            defaultOpenKeys={getDefaultOpenKeys()}
+            items={menuItems}
+            onClick={handleMenuClick}
+            style={{ border: 'none' }}
+          />
+        </div>
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: "#fff" }}>
