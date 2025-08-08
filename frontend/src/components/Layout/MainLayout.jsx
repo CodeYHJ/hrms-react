@@ -25,7 +25,7 @@ const MainLayout = ({ children }) => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { canAccessModule } = usePermission();
-
+  console.log(user, "user");
   // 根据权限动态生成菜单项
   const menuItems = useMemo(() => {
     const items = [
@@ -190,19 +190,19 @@ const MainLayout = ({ children }) => {
 
   // 用户下拉菜单
   const userMenuItems = [
-    {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "个人信息",
-    },
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "系统设置",
-    },
-    {
-      type: "divider",
-    },
+    // {
+    //   key: "profile",
+    //   icon: <UserOutlined />,
+    //   label: "个人信息",
+    // },
+    // {
+    //   key: "settings",
+    //   icon: <SettingOutlined />,
+    //   label: "系统设置",
+    // },
+    // {
+    //   type: "divider",
+    // },
     {
       key: "logout",
       icon: <LogoutOutlined />,
@@ -253,6 +253,7 @@ const MainLayout = ({ children }) => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              width: "100%",
               height: "100%",
               paddingRight: 24,
             }}
