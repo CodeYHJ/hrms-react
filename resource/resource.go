@@ -2,11 +2,11 @@ package resource
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/qiniu/qmgo"
-	"gorm.io/gorm"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // 全局配置文件
@@ -46,16 +46,16 @@ type Db struct {
 	DbName   string `json:"dbNname"`
 }
 
-type Mongo struct {
-	IP      string `json:"ip"`
-	Port    int64  `json:"port"`
-	Dataset string `json:"dataset"`
-}
+// type Mongo struct {
+// 	IP      string `json:"ip"`
+// 	Port    int64  `json:"port"`
+// 	Dataset string `json:"dataset"`
+// }
 
-var MongoClient *qmgo.Client
+// var MongoClient *qmgo.Client
 
 type Config struct {
-	Gin   `json:"gin"`
-	Db    `json:"db"`
-	Mongo `json:"mongo"`
+	Gin `json:"gin"`
+	Db  `json:"db"`
+	// Mongo `json:"mongo"`
 }
