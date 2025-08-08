@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Select, Button, Card, message } from "antd";
+import { Form, Input, Select, Button, Card, message, Space } from "antd";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { candidateService } from "../../services/candidate";
 

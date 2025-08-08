@@ -15,7 +15,11 @@ import AttendanceManagement from "./pages/Attendance/AttendanceManagement";
 import AttendanceHistory from "./pages/Attendance/AttendanceHistory";
 import AttendanceApproval from "./pages/Attendance/AttendanceApproval";
 import RecruitmentInfo from "./pages/Recruitment/RecruitmentInfo";
+import RecruitmentForm from "./pages/Recruitment/RecruitmentForm";
+import RecruitmentDetail from "./pages/Recruitment/RecruitmentDetail";
 import CandidateManagement from "./pages/Candidate/CandidateManagement";
+import CandidateForm from "./pages/Candidate/CandidateForm";
+import CandidateDetail from "./pages/Candidate/CandidateDetail";
 import RankManagement from "./pages/Rank/RankManagement";
 import SalaryGiving from "./pages/Salary/SalaryGiving";
 import SalaryDetail from "./pages/Salary/SalaryDetail";
@@ -62,7 +66,13 @@ function App() {
               <Route path="exam/history" element={<ExamHistory />} />
               <Route path="notification" element={<NotificationManagement />} />
               <Route path="recruitment/manage" element={<RecruitmentInfo />} />
-              <Route path="candidate/*" element={<CandidateManagement />} />
+              <Route path="recruitment/add" element={<RecruitmentForm />} />
+              <Route path="recruitment/edit" element={<RecruitmentForm />} />
+              <Route path="recruitment/detail" element={<RecruitmentDetail />} />
+              <Route path="candidate/manage" element={<CandidateManagement />} />
+              <Route path="candidate/add" element={<CandidateForm />} />
+              <Route path="candidate/edit" element={<CandidateForm />} />
+              <Route path="candidate/detail" element={<CandidateDetail />} />
               <Route path="authority/admin" element={<AuthorityManagement />} />
               <Route path="authority/role" element={<RolePermissionManagement />} />
               <Route path="*" element={<NotFound />} />
