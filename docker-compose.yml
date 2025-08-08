@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  # MySQL 数据库服务
+  mysql-db:
+    image: mysql:8.0
+    container_name: hrms_mysql_db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "123" # 从你的配置中获取的 root 密码
+      # MYSQL_DATABASE 只能设置一个数据库名。
+      # 要创建多个，我们需要使用自定义的初始化脚本。
+    ports:
+      - "3306:3306" # 将主机的 3306 端口映射到容器的 3306 端口
+    volumes:
+      # - ./mysql_data:/var/lib/mysql # 持久化 MySQL 数据
+      # 挂载一个自定义的初始化脚本
+      - ./sql:/docker-entrypoint-initdb.d
+    # entrypoint: ["sh", "/init.sh"]
+    networks:
+      - hrms-network
+
+  # MongoDB 数据库服务
+  mongo-db:
+    image: mongo:5.0
+    container_name: hrms_mongo_db
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: "hrms" # 从你的配置中获取的数据库名
+    ports:
+      - "27017:27017" # 将主机的 27017 端口映射到容器的 27017 端口
+    # volumes:
+    #   - ./mongo_data:/data/db # 持久化 MongoDB 数据
+    networks:
+      - hrms-network
+
+# 定义数据卷，用于数据持久化
+volumes:
+  mysql_data:
+    driver: local
+  # mongo_data:
+  #   driver: local
+
+# 定义一个自定义网络，让服务之间可以通信
+networks:
+  hrms-network:
+    driver: bridge

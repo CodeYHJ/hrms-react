@@ -1,0 +1,1780 @@
+definitions:
+  handler.Response:
+    properties:
+      code:
+        description: 状态码
+        type: integer
+      data:
+        description: 响应数据
+      message:
+        description: 响应消息
+      status:
+        description: 状态码
+        type: boolean
+    type: object
+  model.AddAuthorityDetailDTO:
+    properties:
+      authority_content:
+        type: string
+      model:
+        type: string
+      name:
+        type: string
+      user_type:
+        type: string
+    required:
+    - authority_content
+    - model
+    - name
+    - user_type
+    type: object
+  model.AttendanceRecordCreateDTO:
+    properties:
+      date:
+        type: string
+      leave_days:
+        type: integer
+      overtime_days:
+        type: integer
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+      work_days:
+        type: integer
+    type: object
+  model.AttendanceRecordEditDTO:
+    properties:
+      date:
+        type: string
+      id:
+        format: int64
+        type: integer
+      leave_days:
+        type: integer
+      overtime_days:
+        type: integer
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+      work_days:
+        type: integer
+    type: object
+  model.BranchCompany:
+    properties:
+      branch_id:
+        type: string
+      desc:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  model.CandidateCreateDTO:
+    properties:
+      describe:
+        type: string
+      edu_level:
+        type: string
+      email:
+        type: string
+      experience:
+        type: string
+      job_name:
+        type: string
+      major:
+        type: string
+      name:
+        type: string
+      staff_id:
+        type: string
+    type: object
+  model.CandidateEditDTO:
+    properties:
+      describe:
+        type: string
+      edu_level:
+        type: string
+      email:
+        type: string
+      evaluation:
+        type: string
+      experience:
+        type: string
+      id:
+        format: int64
+        type: integer
+      job_name:
+        type: string
+      major:
+        type: string
+      name:
+        type: string
+      staff_id:
+        type: string
+    type: object
+  model.DepartmentCreateDTO:
+    properties:
+      dep_describe:
+        type: string
+      dep_name:
+        type: string
+    required:
+    - dep_describe
+    - dep_name
+    type: object
+  model.DepartmentEditDTO:
+    properties:
+      dep_describe:
+        type: string
+      dep_id:
+        type: string
+      dep_name:
+        type: string
+    required:
+    - dep_describe
+    - dep_id
+    - dep_name
+    type: object
+  model.ExampleCreateDTO:
+    properties:
+      content:
+        type: string
+      date:
+        type: string
+      describe:
+        type: string
+      limit:
+        type: integer
+      name:
+        type: string
+    type: object
+  model.ExampleEditDTO:
+    properties:
+      date:
+        type: string
+      describe:
+        type: string
+      id:
+        type: integer
+      limit:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    type: object
+  model.ExampleScoreCreateDTO:
+    properties:
+      commit:
+        type: string
+      content:
+        type: string
+      date:
+        type: string
+      example_id:
+        type: string
+      name:
+        type: string
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+    required:
+    - commit
+    - content
+    - example_id
+    - staff_id
+    type: object
+  model.GetAuthorityDetailDTO:
+    properties:
+      model:
+        type: string
+      user_type:
+        type: string
+    required:
+    - model
+    - user_type
+    type: object
+  model.LoginDTO:
+    properties:
+      branch_id:
+        type: string
+      staff_id:
+        type: string
+      user_password:
+        type: string
+    required:
+    - branch_id
+    - staff_id
+    - user_password
+    type: object
+  model.NotificationDTO:
+    properties:
+      date:
+        type: string
+      notice_content:
+        type: string
+      notice_title:
+        type: string
+      type:
+        type: string
+    required:
+    - date
+    - notice_content
+    - notice_title
+    - type
+    type: object
+  model.NotificationEditDTO:
+    properties:
+      date:
+        type: string
+      id:
+        type: integer
+      notice_content:
+        type: string
+      notice_id:
+        type: string
+      notice_title:
+        type: string
+      type:
+        type: string
+    required:
+    - id
+    type: object
+  model.PasswordEditDTO:
+    properties:
+      password:
+        type: string
+      staff_id:
+        type: string
+    type: object
+  model.PasswordQueryVO:
+    properties:
+      id:
+        type: integer
+      password:
+        type: string
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+    type: object
+  model.RankCreateDTO:
+    properties:
+      rank_name:
+        type: string
+    required:
+    - rank_name
+    type: object
+  model.RankEditDTO:
+    properties:
+      rank_id:
+        type: string
+      rank_name:
+        type: string
+    required:
+    - rank_id
+    - rank_name
+    type: object
+  model.RecruitmentCreateDTO:
+    properties:
+      base_location:
+        type: string
+      base_salary:
+        type: string
+      describe:
+        type: string
+      edu_level:
+        type: string
+      email:
+        type: string
+      experience:
+        type: string
+      job_name:
+        type: string
+      job_type:
+        type: string
+    required:
+    - base_location
+    - base_salary
+    - describe
+    - edu_level
+    - email
+    - experience
+    - job_name
+    - job_type
+    type: object
+  model.RecruitmentEditDTO:
+    properties:
+      base_location:
+        type: string
+      base_salary:
+        type: string
+      describe:
+        type: string
+      edu_level:
+        type: string
+      email:
+        type: string
+      experience:
+        type: string
+      id:
+        type: integer
+      job_name:
+        type: string
+      job_type:
+        type: string
+    required:
+    - id
+    type: object
+  model.SalaryCreateDTO:
+    properties:
+      base:
+        type: integer
+      bonus:
+        type: integer
+      commission:
+        type: integer
+      fund:
+        type: integer
+      other:
+        type: integer
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+      subsidy:
+        type: integer
+    type: object
+  model.SalaryEditDTO:
+    properties:
+      base:
+        type: integer
+      bonus:
+        type: integer
+      commission:
+        type: integer
+      fund:
+        type: integer
+      id:
+        format: int64
+        type: integer
+      other:
+        type: integer
+      staff_id:
+        type: string
+      staff_name:
+        type: string
+      subsidy:
+        type: integer
+    type: object
+  model.StaffCreateDTO:
+    properties:
+      base_salary:
+        type: integer
+      birthday_str:
+        type: string
+      card_num:
+        type: string
+      dep_id:
+        type: string
+      edu_level:
+        type: string
+      email:
+        type: string
+      entry_date_str:
+        type: string
+      identity_num:
+        type: string
+      leader_name:
+        type: string
+      leader_staff_id:
+        type: string
+      major:
+        type: string
+      nation:
+        type: string
+      phone:
+        type: integer
+      rank_id:
+        type: string
+      school:
+        type: string
+      sex_str:
+        type: string
+      staff_name:
+        type: string
+    required:
+    - base_salary
+    - birthday_str
+    - card_num
+    - dep_id
+    - edu_level
+    - email
+    - entry_date_str
+    - identity_num
+    - major
+    - nation
+    - phone
+    - rank_id
+    - school
+    - sex_str
+    - staff_name
+    type: object
+  model.UpdateAuthorityDetailDTO:
+    properties:
+      authority_content:
+        type: string
+      id:
+        type: integer
+    required:
+    - authority_content
+    - id
+    type: object
+info:
+  contact: {}
+paths:
+  /api/account/login:
+    post:
+      consumes:
+      - application/json
+      description: 登陆
+      parameters:
+      - description: 登录信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录失败
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 登陆
+      tags:
+      - account
+  /api/account/quit:
+    post:
+      consumes:
+      - application/json
+      description: 退出
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 退出成功
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 退出
+      tags:
+      - account
+  /api/attendance_record/approve/query/{leader_staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主管员工ID
+        in: path
+        name: leader_staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询主管待审批的考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/approve/query/all:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询主管待审批的考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/approve_accept/{attendId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考勤记录ID
+        in: path
+        name: attendId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 审批通过考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/approve_reject/{attendId}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考勤记录ID
+        in: path
+        name: attendId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 审批拒绝考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考勤记录
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AttendanceRecordCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 创建考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/delete/{attendance_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考勤记录ID
+        in: path
+        name: attendance_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新考勤记录信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AttendanceRecordEditDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AttendanceRecordEditDTO'
+      summary: 更新考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/get_attend_record_is_pay/{staff_id}/{date}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      - description: 日期(格式：YYYY-MM)
+        in: path
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询员工指定月份考勤记录是否已结算
+      tags:
+      - 考勤记录
+  /api/attendance_record/query/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询员工考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/query_history/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询员工历史考勤记录
+      tags:
+      - 考勤记录
+  /api/attendance_record/query_history/all:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询员工历史考勤记录
+      tags:
+      - 考勤记录
+  /api/authority/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建授权
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddAuthorityDetailDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建授权
+      tags:
+      - 权限管理
+  /api/authority/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 编辑授权
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateAuthorityDetailDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 编辑授权
+      tags:
+      - 权限管理
+  /api/authority/query_by_user_type/{user_type}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户类型
+        in: path
+        name: user_type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetAuthorityDetailDTO'
+      summary: 根据用户类型查询授权
+      tags:
+      - 权限管理
+  /api/authority/query_by_user_type_and_model:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 根据用户类型和模块查询授权
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.GetAuthorityDetailDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetAuthorityDetailDTO'
+      summary: 根据用户类型和模块查询授权
+      tags:
+      - 权限管理
+  /api/authority/set_admin/{staff_id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 设置管理员
+      tags:
+      - 权限管理
+  /api/authority/set_normal/{staff_id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 设置普通用户
+      tags:
+      - 权限管理
+  /api/authority_render/:modelName:
+    get:
+      consumes:
+      - application/json
+      description: 权限重定向
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: 权限重定向
+      tags:
+      - account
+  /api/candidate/accept/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 候选人ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 接受候选人
+      tags:
+      - 候选人管理
+  /api/candidate/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 候选人信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CandidateCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建候选人信息
+      tags:
+      - 候选人管理
+  /api/candidate/delete/{candidate_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 候选人ID
+        in: path
+        name: candidate_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除候选人信息
+      tags:
+      - 候选人管理
+  /api/candidate/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新候选人信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CandidateEditDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 更新候选人信息
+      tags:
+      - 候选人管理
+  /api/candidate/query_by_name/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 候选人姓名
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据姓名查询候选人
+      tags:
+      - 候选人管理
+  /api/candidate/query_by_staff_id/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据员工ID查询候选人
+      tags:
+      - 候选人管理
+  /api/candidate/reject/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 候选人ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 拒绝候选人
+      tags:
+      - 候选人管理
+  /api/company/query:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.BranchCompany'
+      summary: 查询公司列表
+      tags:
+      - 公司
+  /api/depart/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门信息
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/model.DepartmentCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建部门
+      tags:
+      - 部门管理
+  /api/depart/del/{dep_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门ID
+        in: path
+        name: dep_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除部门
+      tags:
+      - 部门管理
+  /api/depart/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门信息
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/model.DepartmentEditDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 编辑部门
+      tags:
+      - 部门管理
+  /api/depart/query/{dep_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门ID
+        in: path
+        name: dep_id
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询部门
+      tags:
+      - 部门管理
+  /api/example/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ExampleCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建示例/考试
+      tags:
+      - 考试管理
+  /api/example/delete/{example_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试ID
+        in: path
+        name: example_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除考试
+      tags:
+      - 考试管理
+  /api/example/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新考试信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ExampleEditDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 更新考试信息
+      tags:
+      - 考试管理
+  /api/example/parse_example_content:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: 解析考试内容
+      tags:
+      - 考试管理
+  /api/example/query/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试名称
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据名称查询考试
+      tags:
+      - 考试管理
+  /api/example/render_example/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 渲染考试内容
+      tags:
+      - 考试管理
+  /api/example_score/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试成绩信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ExampleScoreCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建考试成绩记录
+      tags:
+      - 考试成绩
+  /api/example_score/query_by_name/{name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 考试名称
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据考试名称查询成绩历史
+      tags:
+      - 考试成绩
+  /api/example_score/query_by_staff_id/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据员工ID查询成绩历史
+      tags:
+      - 考试成绩
+  /api/index:
+    get:
+      consumes:
+      - application/json
+      description: 首页重定向
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: 首页重定向
+      tags:
+      - account
+  /api/notification/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通知
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/model.NotificationDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 创建通知
+      tags:
+      - 通知
+  /api/notification/delete/{notice_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通知ID
+        in: path
+        name: notice_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 删除通知
+      tags:
+      - 通知
+  /api/notification/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通知
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/model.NotificationEditDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 修改通知
+      tags:
+      - 通知
+  /api/notification/query/{notice_title}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 通知标题
+        in: path
+        name: notice_title
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据通知名字查询通知
+      tags:
+      - 通知
+  /api/password/edit:
+    post:
+      consumes:
+      - application/json
+      description: 修改密码
+      parameters:
+      - description: 密码信息
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/model.PasswordEditDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 修改密码
+      tags:
+      - password
+  /api/password/query/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      description: 查询所有密码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.PasswordQueryVO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 查询所有密码
+      tags:
+      - password
+  /api/ping:
+    get:
+      consumes:
+      - application/json
+      description: ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: ping
+      tags:
+      - account
+  /api/rank/{rank_id}/del:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 职级id
+        in: path
+        name: rank_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除职级
+      tags:
+      - Rank
+  /api/rank/{rank_id}/query:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 职级id
+        in: path
+        name: rank_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 查询职级
+      tags:
+      - Rank
+  /api/rank/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 创建职级
+        in: body
+        name: rankCreateDTO
+        required: true
+        schema:
+          $ref: '#/definitions/model.RankCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建职级
+      tags:
+      - Rank
+  /api/rank/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 编辑职级
+        in: body
+        name: rankEditDTO
+        required: true
+        schema:
+          $ref: '#/definitions/model.RankEditDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 编辑职级
+      tags:
+      - Rank
+  /api/recruitment/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招聘信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.RecruitmentCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 创建招聘信息
+      tags:
+      - 招聘管理
+  /api/recruitment/delete/{recruitment_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 招聘信息ID
+        in: path
+        name: recruitment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除招聘信息
+      tags:
+      - 招聘管理
+  /api/recruitment/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 更新招聘信息
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.RecruitmentEditDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 更新招聘信息
+      tags:
+      - 招聘管理
+  /api/recruitment/query/{job_name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 职位名称
+        in: path
+        name: job_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据职位名称查询招聘信息
+      tags:
+      - 招聘管理
+  /api/salary/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 薪资信息
+        in: body
+        name: salary
+        required: true
+        schema:
+          $ref: '#/definitions/model.SalaryCreateDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 创建薪资信息
+      tags:
+      - Salary
+  /api/salary/delete/{salary_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 薪资ID
+        in: path
+        name: salary_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 删除薪资信息
+      tags:
+      - Salary
+  /api/salary/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 薪资信息
+        in: body
+        name: salary
+        required: true
+        schema:
+          $ref: '#/definitions/model.SalaryEditDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 修改薪资信息
+      tags:
+      - Salary
+  /api/salary/query/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: string
+      - description: 每页数量
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 薪资列表
+      tags:
+      - Salary
+      - Salary
+  /api/salary/query/all:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: string
+      - description: 每页数量
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 薪资列表
+      tags:
+      - Salary
+      - Salary
+  /api/salary_record/get_salary_record_is_pay_by_id/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 薪资发放记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据ID查询薪资发放记录是否已发放
+      tags:
+      - SalaryRecord
+  /api/salary_record/pay_salary_record_by_id/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 薪资发放记录ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据ID发放薪资
+      tags:
+      - SalaryRecord
+  /api/salary_record/query/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据员工ID查询薪资发放记录
+      tags:
+      - SalaryRecord
+  /api/salary_record/query_history/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 薪资历史记录
+      tags:
+      - SalaryRecord
+      - SalaryRecord
+  /api/salary_record/query_history/all:
+    get:
+      consumes:
+      - application/json
+      - application/json
+      produces:
+      - application/json
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 薪资历史记录
+      tags:
+      - SalaryRecord
+      - SalaryRecord
+  /api/staff/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工信息
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/model.StaffCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 新增员工信息
+      tags:
+      - staff
+  /api/staff/del/{staff_id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 删除员工信息
+      tags:
+      - staff
+  /api/staff/edit:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工信息
+        in: body
+        name: staff
+        required: true
+        schema:
+          $ref: '#/definitions/model.StaffCreateDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: 编辑员工信息
+      tags:
+      - staff
+  /api/staff/excel_export:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      summary: 导出员工信息
+      tags:
+      - staff
+  /api/staff/query/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据员工ID查询员工信息
+      tags:
+      - staff
+  /api/staff/query_by_dep/{dep_name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门名称
+        in: path
+        name: dep_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据部门查询员工信息
+      tags:
+      - staff
+  /api/staff/query_by_name/{staff_name}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工姓名
+        in: path
+        name: staff_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据员工姓名查询员工信息
+      tags:
+      - staff
+  /api/staff/query_by_staff_id/{staff_id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 员工ID
+        in: path
+        name: staff_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 根据员工ID查询员工信息
+      tags:
+      - staff
+swagger: "2.0"

@@ -1,0 +1,40 @@
+{
+  "name": "hrms-frontend",
+  "version": "1.0.0",
+  "description": "HRMS React Frontend",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^5.0.0",
+    "antd": "^5.2.0",
+    "axios": "^1.3.0",
+    "dayjs": "^1.11.13",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^3.1.0",
+    "eslint": "^8.34.0",
+    "eslint-plugin-react": "^7.32.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "vite": "^4.1.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext js,jsx"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
