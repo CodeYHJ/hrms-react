@@ -31,7 +31,9 @@ export const authService = {
                     const userInfo = cookieValue.split('_')
                     if (userInfo.length >= 4) {
                         try {
-                            const staffName = atob(userInfo[3])
+                            const binary = atob(userInfo[3]); // 解码为原始二进制字符串
+                            const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+                            const staffName = new TextDecoder().decode(bytes);
                             return {
                                 isAuthenticated: true,
                                 userType: userInfo[0],
