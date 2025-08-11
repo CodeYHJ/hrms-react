@@ -1,12 +1,8 @@
 gin:
-  port: 8888
+  port: 8080
 db:
   user: root
   password: 123
-  host: 127.0.0.1
+  host: mysql-db
   port: 3306
   dbName: hrms_C001,hrms_C002
-mongo:
-  ip: 127.0.0.1
-  port: 27017
-  dataset: hrms
