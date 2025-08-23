@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"hrms/model"
 	"hrms/resource"
 	"hrms/service"
@@ -18,6 +19,8 @@ func init() {
 		departGroup.DELETE("/del/:dep_id", DepartDel)
 		departGroup.POST("/edit", DepartEdit)
 		departGroup.GET("/query/:dep_id", DepartQuery)
+		departGroup.GET("/tree", DepartTree)
+		departGroup.GET("/list", DepartList)
 	})
 }
 
@@ -44,10 +47,17 @@ func DepartCreate(c *gin.Context) {
 		sendFail(c, 2001, "部门已存在")
 		return
 	}
+	// 确保parent_dep_id默认为'0'
+	parentDepId := departmentCreateDTO.ParentDepId
+	if parentDepId == "" {
+		parentDepId = "0"
+	}
+
 	departmentCreate := model.Department{
 		DepId:       service.RandomID("dep"),
 		DepDescribe: departmentCreateDTO.DepDescribe,
 		DepName:     departmentCreateDTO.DepName,
+		ParentDepId: parentDepId,
 	}
 	if result = resource.HrmsDB(c).Create(&departmentCreate); result.Error != nil {
 		result.Rollback()
@@ -99,8 +109,18 @@ func DepartEdit(c *gin.Context) {
 		sendFail(c, 5001, "编辑部门失败:"+err.Error())
 		return
 	}
+	// 确保parent_dep_id默认为'0'
+	parentDepId := departmentEditDTO.ParentDepId
+	if parentDepId == "" {
+		parentDepId = "0"
+	}
+
 	resource.HrmsDB(c).Model(&model.Department{}).Where("dep_id = ?", departmentEditDTO.DepId).
-		Updates(&model.Department{DepDescribe: departmentEditDTO.DepDescribe, DepName: departmentEditDTO.DepName})
+		Updates(&model.Department{
+			DepDescribe: departmentEditDTO.DepDescribe,
+			DepName:     departmentEditDTO.DepName,
+			ParentDepId: parentDepId,
+		})
 
 	sendSuccess(c, nil, "编辑部门成功")
 }
@@ -110,34 +130,33 @@ func DepartEdit(c *gin.Context) {
 // @Tags 部门管理
 // @Accept  json
 // @Produce  json
-// @Param dep_id path string true "部门ID"
+// @Param dep_id path string true "部门ID，all为查询全部并返回树形结构"
 // @Param page query int false "页码"
 // @Param limit query int false "每页数量"
 // @Router /api/depart/query/{dep_id} [get]
 func DepartQuery(c *gin.Context) {
 	var total int64 = 1
 	// 分页
-	start, limit := service.AcceptPage(c)
+	// start, limit := service.AcceptPage(c)
 	depId := c.Param("dep_id")
 	var deps []model.Department
+
 	if depId == "all" {
-		// 查询全部
-		if start == -1 && start == -1 {
-			resource.HrmsDB(c).Find(&deps)
-		} else {
-			resource.HrmsDB(c).Offset(start).Limit(limit).Find(&deps)
-		}
+		// 查询全部并返回树形结构
+		resource.HrmsDB(c).Find(&deps)
 		if len(deps) == 0 {
-			// 不存在
-			sendFail(c, 2001, "不存在")
+			// 返回空树
+			sendSuccess(c, []model.DepartmentTreeNode{}, "获取成功")
 			return
 		}
-		// 总记录数
-		resource.HrmsDB(c).Model(&model.Department{}).Count(&total)
-
-		sendTotalSuccess(c, deps, total, "")
+		// 构建部门树
+		tree := model.BuildDepartmentTree(deps)
+		fmt.Printf("tree = %v", tree)
+		sendSuccess(c, tree, "获取成功")
 		return
 	}
+
+	// 查询单个部门
 	resource.HrmsDB(c).Where("dep_id = ?", depId).Find(&deps)
 	if len(deps) == 0 {
 		// 不存在
@@ -145,6 +164,44 @@ func DepartQuery(c *gin.Context) {
 		return
 	}
 	total = int64(len(deps))
-
 	sendTotalSuccess(c, deps, total, "")
+}
+
+// 获取部门树
+// @Summary 获取部门树
+// @Tags 部门管理
+// @Accept  json
+// @Produce  json
+// @Router /api/depart/tree [get]
+func DepartTree(c *gin.Context) {
+	var deps []model.Department
+	resource.HrmsDB(c).Find(&deps)
+
+	if len(deps) == 0 {
+		// 返回空树
+		sendSuccess(c, []model.DepartmentTreeNode{}, "获取成功")
+		return
+	}
+
+	// 构建部门树
+	tree := model.BuildDepartmentTree(deps)
+	sendSuccess(c, tree, "获取成功")
+}
+
+// 获取部门列表（扁平化）
+// @Summary 获取部门列表
+// @Tags 部门管理
+// @Accept  json
+// @Produce  json
+// @Router /api/depart/list [get]
+func DepartList(c *gin.Context) {
+	var deps []model.Department
+	resource.HrmsDB(c).Find(&deps)
+
+	if len(deps) == 0 {
+		sendFail(c, 2001, "不存在")
+		return
+	}
+
+	sendSuccess(c, deps, "获取成功")
 }

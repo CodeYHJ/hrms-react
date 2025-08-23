@@ -14,6 +14,18 @@ export const departmentService = {
         return response
     },
 
+    // 获取部门树形结构
+    getDepartmentTree: async () => {
+        const response = await api.get('/depart/tree')
+        return response
+    },
+
+    // 获取部门列表（扁平化）
+    getDepartmentList: async () => {
+        const response = await api.get('/depart/list')
+        return response
+    },
+
     // 创建部门
     createDepartment: async (departmentData) => {
         const response = await api.post('/depart/create', departmentData)

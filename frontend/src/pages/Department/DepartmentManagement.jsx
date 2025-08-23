@@ -9,6 +9,7 @@ import {
   Popconfirm,
   Input,
   Form,
+  Tag,
 } from "antd";
 import {
   PlusOutlined,
@@ -26,31 +27,30 @@ const DepartmentManagement = () => {
   const [modalType, setModalType] = useState("add"); // 'add' or 'edit'
   const [currentDepartment, setCurrentDepartment] = useState(null);
   const [searchForm] = Form.useForm();
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 10,
-    total: 0,
-    showSizeChanger: true,
-    showQuickJumper: true,
-    showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
-  });
 
-  // 获取部门列表
-  const fetchDepartments = async (params = {}) => {
+  // 获取部门树形结构
+  const fetchDepartments = async () => {
     setLoading(true);
-    const response = await departmentService.getAllDepartments();
-    console.log(response, "response");
-    if (response.status) {
-      setDepartments(response.data || []);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.total,
-      }));
-    } else {
-      message.error(response.message || "获取部门列表失败");
+    try {
+      const response = await departmentService.getAllDepartments();
+      console.log(response, "response");
+      if (response.status) {
+        setDepartments(response.data || []);
+      } else {
+        message.error(response.message || "获取部门列表失败");
+        setDepartments([]);
+      }
+    } catch (error) {
+      message.error("获取部门列表失败");
       setDepartments([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  // 渲染部门名称
+  const renderDepartmentName = (text, record) => {
+    return text;
   };
 
   // 搜索部门
@@ -63,24 +63,26 @@ const DepartmentManagement = () => {
     }
 
     setLoading(true);
-    const response = await departmentService.getDepartmentById(dep_id.trim());
-    if (response.status) {
-      setDepartments(response.data ? [response.data] : []);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.data ? 1 : 0,
-      }));
-      message.success("搜索成功");
-    } else {
-      message.error(response.message || "搜索失败");
+    try {
+      const response = await departmentService.getDepartmentById(dep_id.trim());
+      if (response.status) {
+        setDepartments(response.data ? [response.data] : []);
+        message.success("搜索成功");
+      } else {
+        message.error(response.message || "搜索失败");
+        setDepartments([]);
+      }
+    } catch (error) {
+      message.error("搜索失败");
       setDepartments([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // 删除部门
   const handleDelete = async (record) => {
-    const response = await departmentService.deleteDepartment(record.dep_id);
+    const response = await departmentService.deleteDepartment(record.DepId);
     if (response.status) {
       fetchDepartments(); // 重新加载列表
     }
@@ -119,21 +121,32 @@ const DepartmentManagement = () => {
       title: "序号",
       key: "index",
       width: 60,
-      render: (text, record, index) => {
-        return (pagination.current - 1) * pagination.pageSize + index + 1;
-      },
+      render: (text, record, index) => index + 1,
     },
     {
       title: "部门名称",
-      dataIndex: "dep_name",
-      key: "dep_name",
-      width: 150,
+      dataIndex: "DepName",
+      key: "DepName",
+      width: 200,
+      render: renderDepartmentName,
     },
     {
       title: "部门描述",
-      dataIndex: "dep_describe",
-      key: "dep_describe",
+      dataIndex: "DepDescribe",
+      key: "DepDescribe",
       width: 300,
+    },
+    {
+      title: "上级部门",
+      key: "parent_name",
+      width: 150,
+      render: (text, record) => {
+        // 如果ParentDepId为'0'或没有ParentDepId，显示"顶级部门"
+        if (record.ParentDepId === "0" || !record.ParentDepId) {
+          return "顶级部门";
+        }
+        return "-"; // 在树形结构中不显示上级部门
+      },
     },
     {
       title: "创建时间",
@@ -217,11 +230,10 @@ const DepartmentManagement = () => {
           columns={columns}
           dataSource={departments}
           loading={loading}
-          rowKey="dep_id"
-          pagination={pagination}
-          onChange={(paginationInfo) => {
-            setPagination(paginationInfo);
-          }}
+          rowKey="DepId"
+          pagination={false}
+          childrenColumnName="Children"
+          defaultExpandAllRows={true}
           scroll={{ x: 800 }}
         />
       </Card>

@@ -87,10 +87,12 @@ CREATE TABLE `department` (
                               `updated_at` datetime DEFAULT NULL,
                               `deleted_at` datetime DEFAULT NULL,
                               `dep_describe` varchar(64) DEFAULT NULL COMMENT '部门介绍',
-                              PRIMARY KEY (`id`)
+                              `parent_dep_id` varchar(32) NOT NULL DEFAULT '0' COMMENT '上级部门ID，0表示顶级部门',
+                              PRIMARY KEY (`id`),
+                              KEY `idx_parent_dep_id` (`parent_dep_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `department` VALUES (26,'dep_1322682358','软件开发部','2021-03-21 18:36:54','2021-04-10 19:07:01',NULL,'支撑软件的开发和维护工作'),(27,'dep_2547022224','硬件开发部','2021-03-21 18:37:08','2021-05-26 20:03:31',NULL,'支撑硬件的开发和维护工作'),(28,'dep_913998902','产品销售部','2021-03-21 18:37:36','2021-05-26 20:03:50',NULL,'支撑产品的售卖和推销工作'),(29,'dep_1460851561','人力资源部','2021-03-23 10:10:07','2021-05-26 20:04:04',NULL,'负责管理公司人力及数据');
+INSERT INTO `department` VALUES (26,'dep_1322682358','软件开发部','2021-03-21 18:36:54','2021-04-10 19:07:01',NULL,'支撑软件的开发和维护工作','0'),(27,'dep_2547022224','硬件开发部','2021-03-21 18:37:08','2021-05-26 20:03:31',NULL,'支撑硬件的开发和维护工作','0'),(28,'dep_913998902','产品销售部','2021-03-21 18:37:36','2021-05-26 20:03:50',NULL,'支撑产品的售卖和推销工作','0'),(29,'dep_1460851561','人力资源部','2021-03-23 10:10:07','2021-05-26 20:04:04',NULL,'负责管理公司人力及数据','0');
 
 CREATE TABLE `example` (
                            `id` bigint NOT NULL AUTO_INCREMENT,
