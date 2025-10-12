@@ -89,11 +89,6 @@ const Login = () => {
     <div className="login-container">
       <Card className="login-form">
         <div className="login-title">
-          <h3
-            style={{ color: "dodgerblue", fontWeight: "bold", marginBottom: 8 }}
-          >
-            -连锁经营企业-
-          </h3>
           <h1>人力资源管理系统</h1>
         </div>
         <Form
