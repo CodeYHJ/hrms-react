@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          # platforms: linux/amd64,linux/arm64 # ✅ 多平台支持
+          platforms: linux/arm64 # ✅ 多平台支持
           tags: |
             codeyhj/hrms-docker:latest
           cache-from: type=gha
