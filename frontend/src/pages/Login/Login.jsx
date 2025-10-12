@@ -170,7 +170,7 @@ const Login = () => {
           </Form.Item>
         </Form>
 
-        <div
+        {/* <div
           style={{
             textAlign: "center",
             marginTop: 16,
@@ -178,8 +178,8 @@ const Login = () => {
             fontSize: "12px",
           }}
         >
-          <p>测试账号：3117000001 / admin1</p>
-        </div>
+          <p>测试账号：admin / admin1</p>
+        </div> */}
       </Card>
     </div>
   );
