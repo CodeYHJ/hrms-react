@@ -6,9 +6,9 @@ on:
     paths:
       - "config/**"
       - "frontend/**"
-      - "model/**
+      - "model/**"
       - "resource/**"
-      - "server/**
+      - "server/**"
       - "sql/**"
       - "dockerfile"
       - "go.mod"
