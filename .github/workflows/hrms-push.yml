@@ -39,20 +39,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          # file: ./docker/opencode/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64 # ✅ 多平台支持
           tags: |
             codeyhj/hrms-docker:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Update Docker Hub description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          context: .
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-          repository: codeyhj/hrms-docker
-          # readme-filepath: ./docker/opencode/README.docker.md
