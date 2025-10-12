@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  # 需要调试把此app注释，然后按照README.md运行
+  app:
+    image: codeyhj/hrms-docker:latest
+    container_name: hrms_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql-db: # 等待 MySQL 数据库服务启动
+        condition: service_healthy
+    # 20s后启动
+    command: sh -c "sleep 20 && ./server"
+    networks:
+      - hrms-network
+  # MySQL 数据库服务
+  mysql-db:
+    image: mysql:8.0
+    container_name: hrms_mysql_db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "123" # 从你的配置中获取的 root 密码
+      # MYSQL_DATABASE 只能设置一个数据库名。
+      # 要创建多个，我们需要使用自定义的初始化脚本。
+    ports:
+      - "3306:3306" # 将主机的 3306 端口映射到容器的 3306 端口
+    volumes:
+      # - ./mysql_data:/var/lib/mysql # 持久化 MySQL 数据
+      # 挂载一个自定义的初始化脚本
+      - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p123"]
+      interval: 5s
+      retries: 5
+    networks:
+      - hrms-network
+
+# 定义数据卷，用于数据持久化
+# volumes:
+#   mysql_data:
+#     driver: local
+
+# 定义一个自定义网络，让服务之间可以通信
+networks:
+  hrms-network:
+    driver: bridge
