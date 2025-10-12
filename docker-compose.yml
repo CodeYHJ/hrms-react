@@ -8,10 +8,12 @@ services:
     ports:
       - "8080:8080"
     # environment:
-    #   - HRMS_ENV=production
+    #   - HRMS_ENV=prod
     depends_on:
       mysql-db: # 等待 MySQL 数据库服务启动
         condition: service_healthy
+    # 20s后启动
+    command: sh -c "sleep 20 && ./server"
     networks:
       - hrms-network
   # MySQL 数据库服务

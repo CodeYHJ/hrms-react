@@ -22,7 +22,7 @@ import (
 func InitConfig() error {
 	config := &resource.Config{}
 	vip := viper.New()
-	vip.AddConfigPath("./config")
+	configPath := "./config"
 	vip.SetConfigType("yaml")
 	// 环境判断
 	env := os.Getenv("HRMS_ENV")
@@ -32,12 +32,16 @@ func InitConfig() error {
 	}
 	if env == "prod" {
 		// 生产环境
+		configPath = "/app/config"
 		vip.SetConfigName("config-prod")
 	}
 	if env == "self" {
 		// 生产环境
 		vip.SetConfigName("config-self")
 	}
+	// 设置配置文件路径
+	vip.AddConfigPath(configPath)
+
 	err := vip.ReadInConfig()
 	if err != nil {
 		log.Printf("[config.Init] err = %v", err)
