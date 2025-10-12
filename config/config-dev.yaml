@@ -3,6 +3,6 @@ gin:
 db:
   user: root
   password: 123
-  host: mysql-db
+  host: localhost
   port: 3306
   dbName: hrms_C001,hrms_C002
