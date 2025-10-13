@@ -24,7 +24,7 @@ const MainLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { canAccessModule } = usePermission();
+  const { canAccessModule, isAdmin } = usePermission();
   console.log(user, "user");
   // 根据权限动态生成菜单项
   const menuItems = useMemo(() => {
@@ -38,20 +38,26 @@ const MainLayout = ({ children }) => {
 
     // 员工管理
     if (canAccessModule("staff")) {
+      const staffChildren = [
+        {
+          key: "/staff/info",
+          label: "员工信息管理",
+        },
+      ];
+      
+      // 只有管理员才能看到密码管理
+      if (isAdmin()) {
+        staffChildren.push({
+          key: "/staff/password",
+          label: "登录密码管理",
+        });
+      }
+      
       items.push({
         key: "/staff",
         icon: <TeamOutlined />,
         label: "员工管理",
-        children: [
-          {
-            key: "/staff/info",
-            label: "员工信息管理",
-          },
-          {
-            key: "/staff/password",
-            label: "登录密码管理",
-          },
-        ],
+        children: staffChildren,
       });
     }
 
