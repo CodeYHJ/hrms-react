@@ -63,6 +63,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      - name: Remove existing manifest
+        run: |
+          docker manifest rm codeyhj/hrms-docker:latest || true
+
       - name: Create and push manifest
         run: |
           docker manifest create codeyhj/hrms-docker:latest \
