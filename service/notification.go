@@ -1,11 +1,31 @@
 package service
 
 import (
-	"github.com/gin-gonic/gin"
 	"hrms/model"
 	"hrms/resource"
 	"log"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
+
+func GetPublishedNotifications(c *gin.Context, start int, limit int) ([]*model.Notification, int64, error) {
+	var notifications []*model.Notification
+	var err error
+	if start == -1 && limit == -1 {
+		// 不加分页
+		err = resource.HrmsDB(c).Where("status = ?", "published").Order("date desc").Find(&notifications).Error
+	} else {
+		// 加分页
+		err = resource.HrmsDB(c).Where("status = ?", "published").Order("date desc").Offset(start).Limit(limit).Find(&notifications).Error
+	}
+	if err != nil {
+		return nil, 0, err
+	}
+	var total int64
+	resource.HrmsDB(c).Model(&model.Notification{}).Where("status = ?", "published").Count(&total)
+	return notifications, total, nil
+}
 
 func GetNotificationByTitle(c *gin.Context, noticeTitle string, start int, limit int) ([]*model.Notification, int64, error) {
 	var notifications []*model.Notification
@@ -41,7 +61,11 @@ func CreateNotification(c *gin.Context, dto *model.NotificationDTO) error {
 	var notification model.Notification
 	Transfer(&dto, &notification)
 	notification.NoticeId = RandomID("notice")
-	notification.Date = Str2Time(dto.Date, 0)
+	if dto.Date == "" {
+		notification.Date = time.Now()
+	} else {
+		notification.Date = Str2Time(dto.Date, 0)
+	}
 	// 富文本内容base64编码(前端实现)
 	//notification.NoticeContent = base64.StdEncoding.EncodeToString([]byte(dto.NoticeContent))
 	if err := resource.HrmsDB(c).Create(&notification).Error; err != nil {
@@ -76,7 +100,9 @@ func DelNotificationById(c *gin.Context, notice_id string) error {
 func UpdateNotificationById(c *gin.Context, dto *model.NotificationEditDTO) error {
 	var notification model.Notification
 	Transfer(&dto, &notification)
-	notification.Date = Str2Time(dto.Date, 0)
+	if dto.Date != "" {
+		notification.Date = Str2Time(dto.Date, 0)
+	}
 	if err := resource.HrmsDB(c).Where("id = ?", notification.ID).
 		Updates(&notification).Error; err != nil {
 		log.Printf("UpdateNotificationById err = %v", err)

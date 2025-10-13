@@ -100,7 +100,7 @@ const NotificationManagement = () => {
   // 删除通知
   const handleDelete = async (record) => {
     const response = await notificationService.deleteNotification(
-      record.notification_id
+      record.notice_id
     );
 
     if (response.status) {
@@ -115,7 +115,7 @@ const NotificationManagement = () => {
       width: 800,
       content: (
         <div style={{ marginTop: 16 }}>
-          <h3>{record.title}</h3>
+          <h3>{record.notice_title}</h3>
           <p style={{ color: "#666", marginBottom: 16 }}>
             发布时间:{" "}
             {record.CreatedAt
@@ -128,7 +128,7 @@ const NotificationManagement = () => {
               whiteSpace: "pre-wrap",
             }}
           >
-            {record.content}
+            {record.notice_content}
           </div>
         </div>
       ),
@@ -314,7 +314,7 @@ const NotificationManagement = () => {
           columns={columns}
           dataSource={notificationList}
           loading={loading}
-          rowKey="notification_id"
+          rowKey="notice_id"
           pagination={pagination}
           onChange={(paginationInfo) => {
             setPagination(paginationInfo);
@@ -335,6 +335,7 @@ const NotificationManagement = () => {
         <NotificationForm
           type={modalType}
           initialValues={currentNotification}
+          currentNotification={currentNotification}
           onSuccess={handleFormSuccess}
           onCancel={handleModalClose}
         />
@@ -344,26 +345,38 @@ const NotificationManagement = () => {
 };
 
 // 通知表单组件
-const NotificationForm = ({ type, initialValues, onSuccess, onCancel }) => {
+const NotificationForm = ({ type, initialValues, currentNotification, onSuccess, onCancel }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialValues) {
-      form.setFieldsValue({
-        ...initialValues,
-        publish_date: initialValues.CreatedAt
-          ? dayjs(initialValues.CreatedAt)
-          : null,
-      });
+      const fieldsValue = {
+        title: initialValues.notice_title,
+        content: initialValues.notice_content,
+        type: initialValues.type,
+      };
+      if (initialValues.status) {
+        fieldsValue.status = initialValues.status;
+      }
+      form.setFieldsValue(fieldsValue);
     }
   }, [initialValues, form]);
 
   const handleSubmit = async (values) => {
     setLoading(true);
+    let data = {
+      notice_title: values.title,
+      notice_content: values.content,
+      type: values.type,
+      status: values.status,
+    };
+    if (type === "edit") {
+      data.id = currentNotification.ID || currentNotification.id;
+    }
     const response = await (type === "add"
-      ? notificationService.createNotification(values)
-      : notificationService.editNotification(values));
+      ? notificationService.createNotification(data)
+      : notificationService.editNotification(data));
 
     if (response.status) {
       onSuccess();

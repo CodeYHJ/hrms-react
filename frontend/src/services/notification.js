@@ -4,6 +4,9 @@ export const notificationService = {
   // 获取所有通知
   getAllNotifications: () => api.get('/notification/query/all'),
   
+  // 获取已发布通知
+  getPublishedNotifications: (params) => api.get('/notification/query/published', { params }),
+  
   // 删除通知
   deleteNotification: (notificationId) => api.delete(`/notification/delete/${notificationId}`),
   

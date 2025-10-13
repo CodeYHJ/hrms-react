@@ -135,13 +135,16 @@ CREATE TABLE `notification` (
                                 `notice_content` text NOT NULL COMMENT '通知内容',
                                 `type` varchar(32) NOT NULL COMMENT '通知类别',
                                 `date` datetime NOT NULL COMMENT '通知时间',
+                                `status` varchar(20) NOT NULL DEFAULT 'draft' COMMENT '通知状态：published-已发布，draft-草稿',
                                 `created_at` datetime DEFAULT NULL,
                                 `updated_at` datetime DEFAULT NULL,
                                 `deleted_at` datetime DEFAULT NULL,
                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `notification` VALUES (5,'notice_3041297091','公司培训通知','<p style=\"text-align: center;\"><b>公司培训通知</b></p><p style=\"text-align: left;\"><b>2020年3月8日早上8点进行公司XX培训，特此通知<img src=\"http://localhost:8888/static/lib/layui-v2.5.5/images/face/0.gif\" alt=\"[微笑]\"></b></p>','培训通知','2020-03-08 08:00:00','2021-03-24 11:31:36','2021-04-16 16:32:20',NULL),(17,'notice_2225559911','广州总部通知','<p style=\"text-align: center;\">广州总部培训通知</p>','新闻通知','2021-04-17 08:00:00','2021-04-17 16:42:39','2021-05-26 20:06:25',NULL),(18,'notice_1946314826','公司培训通知[紧急]','test','紧急通知','2021-05-27 08:00:00','2021-05-27 13:03:34','2021-05-27 13:03:34','2021-05-27 13:03:39');
+
+INSERT INTO `notification` VALUES (5,'notice_3041297091','公司培训通知','<p style=\"text-align: center;\"><b>公司培训通知</b></p><p style=\"text-align: left;\"><b>2020年3月8日早上8点进行公司XX培训，特此通知<img src=\"http://localhost:8888/static/lib/layui-v2.5.5/images/face/0.gif\" alt=\"[微笑]\"></b></p>','培训通知','2020-03-08 08:00:00','published','2021-03-24 11:31:36','2021-04-16 16:32:20',NULL),(17,'notice_2225559911','广州总部通知','<p style=\"text-align: center;\">广州总部培训通知</p>','新闻通知','2021-04-17 08:00:00','published','2021-04-17 16:42:39','2021-05-26 20:06:25',NULL),(18,'notice_1946314826','公司培训通知[紧急]','test','紧急通知','2021-05-27 08:00:00','draft','2021-05-27 13:03:34','2021-05-27 13:03:34','2021-05-27 13:03:39');
+
 
 CREATE TABLE `rank` (
                         `id` bigint NOT NULL AUTO_INCREMENT,

@@ -11,6 +11,7 @@ type Notification struct {
 	NoticeTitle   string    `gorm:"column:notice_title" json:"notice_title"`
 	NoticeContent string    `gorm:"column:notice_content" json:"notice_content"`
 	Type          string    `gorm:"column:type" json:"type"`
+	Status        string    `gorm:"column:status" json:"status"`
 	Date          time.Time `gorm:"column:date" json:"date"`
 }
 
@@ -20,6 +21,7 @@ type NotificationEditDTO struct {
 	NoticeTitle   string `gorm:"column:notice_title" json:"notice_title"`
 	NoticeContent string `gorm:"column:notice_content" json:"notice_content"`
 	Type          string `gorm:"column:type" json:"type"`
+	Status        string `gorm:"column:status" json:"status"`
 	Date          string `gorm:"column:date" json:"date"`
 }
 
@@ -27,5 +29,6 @@ type NotificationDTO struct {
 	NoticeTitle   string `gorm:"column:notice_title" json:"notice_title" binding:"required"`
 	NoticeContent string `gorm:"column:notice_content" json:"notice_content" binding:"required"`
 	Type          string `gorm:"column:type" json:"type" binding:"required"`
-	Date          string `gorm:"column:date" json:"date" binding:"required"`
+	Status        string `gorm:"column:status" json:"status" binding:"required"`
+	Date          string `gorm:"column:date" json:"date"`
 }

@@ -16,6 +16,7 @@ func init() {
 		notificationGroup.DELETE("/delete/:notice_id", DeleteNotificationById)
 		notificationGroup.POST("/edit", UpdateNotificationById)
 		notificationGroup.GET("/query/:notice_title", GetNotificationByTitle)
+		notificationGroup.GET("/query/published", GetPublishedNotifications)
 	})
 }
 
@@ -89,6 +90,27 @@ func GetNotificationByTitle(c *gin.Context) {
 	notifications, total, err := service.GetNotificationByTitle(c, noticeTitle, start, limit)
 	if err != nil {
 		log.Printf("[DeleteNotificationById] err = %v", err)
+		sendFail(c, 5002, err.Error())
+		return
+	}
+	sendTotalSuccess(c, notifications, total, "")
+}
+
+// 获取已发布通知
+// @Summary 获取已发布通知
+// @Tags 通知
+// @Accept  json
+// @Produce  json
+// @Param page query int false "页码"
+// @Param limit query int false "每页数量"
+// @Success 200 {object} Response
+// @Router /api/notification/query/published [get]
+func GetPublishedNotifications(c *gin.Context) {
+	start, limit := service.AcceptPage(c)
+	// 业务处理
+	notifications, total, err := service.GetPublishedNotifications(c, start, limit)
+	if err != nil {
+		log.Printf("[GetPublishedNotifications] err = %v", err)
 		sendFail(c, 5002, err.Error())
 		return
 	}
