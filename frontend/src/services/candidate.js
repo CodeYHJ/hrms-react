@@ -67,5 +67,17 @@ export const candidateService = {
     acceptCandidate: async (candidateId) => {
         const response = await api.get(`/candidate/accept/${candidateId}`)
         return response
+    },
+
+    // 发送offer
+    sendOffer: async (candidateId) => {
+        const response = await api.post(`/candidate/send_offer/${candidateId}`)
+        return response
+    },
+
+    // 接受offer
+    acceptOffer: async (candidateId) => {
+        const response = await api.post(`/candidate/accept_offer/${candidateId}`)
+        return response
     }
 }

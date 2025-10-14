@@ -14,7 +14,7 @@ type Candidate struct {
 	Describe    string `gorm:"column:describe" json:"describe"`
 	Email       string `gorm:"column:email" json:"email"`
 	Evaluation  string `gorm:"column:evaluation" json:"evaluation"`
-	Status      int64  `gorm:"column:status" json:"status"`
+	Status      int64  `gorm:"column:status" json:"status"` // 0=待处理, 1=面试中, 2=录取, 3=offer已发送, 4=接受offer, 5=拒绝offer
 }
 
 type CandidateCreateDTO struct {

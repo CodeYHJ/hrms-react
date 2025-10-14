@@ -119,3 +119,13 @@ func SetCandidateAcceptById(c *gin.Context, id int64) error {
 	}
 	return nil
 }
+
+// 设置候选人状态
+func SetCandidateStatus(c *gin.Context, id int64, status int64) error {
+	if err := resource.HrmsDB(c).Where("id = ?", id).
+		Updates(&model.Candidate{Status: status}).Error; err != nil {
+		log.Printf("SetCandidateStatus err = %v", err)
+		return err
+	}
+	return nil
+}

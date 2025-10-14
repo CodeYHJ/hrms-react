@@ -1,251 +1,172 @@
 import React, { useState, useEffect } from "react";
 import {
-  Card,
-  Button,
   Table,
+  Button,
   Space,
+  message,
+  Card,
   Form,
   Input,
-  Row,
-  Col,
-  message,
   Modal,
   Popconfirm,
 } from "antd";
 import {
   PlusOutlined,
+  SearchOutlined,
+  EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-  EyeOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-  ExportOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  SwapOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
-import { staffService } from "../../services/staff";
 import { usePermission } from "../../components/Auth/usePermission";
-import { formatDate, formatGender } from "../../utils/helpers";
-import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
+import { staffService } from "../../services/staff";
+import { useNavigate } from "react-router-dom";
 import StaffForm from "./StaffForm";
 
-const StaffManagement = () => {
-  const [form] = Form.useForm();
-  const { hasPermission } = usePermission();
+const { Search } = Input;
 
-  // 状态管理
-  const [staffList, setStaffList] = useState([]);
+const StaffManagement = () => {
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const [pagination, setPagination] = useState({
-    ...PAGINATION_CONFIG,
+    current: 1,
+    pageSize: 10,
     total: 0,
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showTotal: (total, range) => `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
   });
 
-  // 表单相关状态
-  const [formVisible, setFormVisible] = useState(false);
-  const [editData, setEditData] = useState(null);
+  const { hasPermission } = usePermission();
+  const navigate = useNavigate();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
-  // 页面加载时获取员工列表
+  // 格式化性别
+  const formatGender = (sex) => {
+    switch (sex) {
+      case 1:
+        return "男";
+      case 2:
+        return "女";
+      default:
+        return "未知";
+    }
+  };
+
+  // 初始化数据加载
   useEffect(() => {
-    fetchStaffList();
+    loadData();
   }, []);
 
-  // 获取员工列表
-  const fetchStaffList = async (params = {}) => {
+  // 加载数据
+  const loadData = async (params = {}) => {
     setLoading(true);
-    const response = await staffService.getAllStaff(params);
-    if (response.status) {
-      const data = Array.isArray(response.data) ? response.data : [];
-      setStaffList(data);
-      setPagination((prev) => ({
-        ...prev,
-        total: data.length,
-      }));
-    } else {
-      // 错误已在拦截器中显示，这里不需要重复显示
-    }
+    const {
+      current = pagination.current,
+      pageSize = pagination.pageSize,
+      search = searchValue,
+    } = params;
+    const response = await staffService.list({
+      page: current,
+      size: pageSize,
+      search,
+    });
+    setData(response.data.data || []);
+    setPagination((prev) => ({
+      ...prev,
+      current,
+      pageSize,
+      total: response.data.total || 0,
+    }));
     setLoading(false);
+  };
+  // 处理表格变化
+  const handleTableChange = (pagination, filters, sorter) => {
+    loadData({ current: pagination.current, pageSize: pagination.pageSize });
   };
 
   // 搜索员工
-  const handleSearch = async (values) => {
-    if (!values.staff_name?.trim()) {
-      // 如果搜索框为空，重新加载所有数据
-      fetchStaffList();
-      return;
-    }
-
-    setSearchLoading(true);
-    const response = await staffService.searchStaffByName(
-      values.staff_name.trim()
-    );
-    if (response.status) {
-      const data = Array.isArray(response.data) ? response.data : [];
-      setStaffList(data);
-      setPagination((prev) => ({
-        ...prev,
-        total: data.length,
-        current: 1,
-      }));
-    } else {
-      // 错误已在拦截器中显示
-      setStaffList([]);
-      setPagination((prev) => ({
-        ...prev,
-        total: 0,
-        current: 1,
-      }));
-    }
-    setSearchLoading(false);
-  };
-
-  // 重置搜索
-  const handleReset = () => {
-    form.resetFields();
-    fetchStaffList();
-  };
-
-  // 查看员工详情
-  const handleView = (record) => {
-    Modal.info({
-      title: "员工详情",
-      width: 600,
-      content: (
-        <div style={{ marginTop: 16 }}>
-          <Row gutter={[16, 8]}>
-            <Col span={8}>
-              <strong>员工工号:</strong>
-            </Col>
-            <Col span={16}>{record.staff_id}</Col>
-            <Col span={8}>
-              <strong>员工姓名:</strong>
-            </Col>
-            <Col span={16}>{record.staff_name}</Col>
-            <Col span={8}>
-              <strong>部门:</strong>
-            </Col>
-            <Col span={16}>{record.dep_name || "未分配"}</Col>
-            <Col span={8}>
-              <strong>职级:</strong>
-            </Col>
-            <Col span={16}>{record.rank_name || "未分配"}</Col>
-            <Col span={8}>
-              <strong>上级工号:</strong>
-            </Col>
-            <Col span={16}>{record.leader_staff_id || "无"}</Col>
-            <Col span={8}>
-              <strong>上级姓名:</strong>
-            </Col>
-            <Col span={16}>{record.leader_name || "无"}</Col>
-            <Col span={8}>
-              <strong>出生日期:</strong>
-            </Col>
-            <Col span={16}>{formatDate(record.birthday)}</Col>
-            <Col span={8}>
-              <strong>性别:</strong>
-            </Col>
-            <Col span={16}>{formatGender(record.sex)}</Col>
-            <Col span={8}>
-              <strong>身份证号:</strong>
-            </Col>
-            <Col span={16}>{record.identity_num}</Col>
-            <Col span={8}>
-              <strong>民族:</strong>
-            </Col>
-            <Col span={16}>{record.nation}</Col>
-            <Col span={8}>
-              <strong>学校:</strong>
-            </Col>
-            <Col span={16}>{record.school}</Col>
-            <Col span={8}>
-              <strong>专业:</strong>
-            </Col>
-            <Col span={16}>{record.major}</Col>
-            <Col span={8}>
-              <strong>学历:</strong>
-            </Col>
-            <Col span={16}>{record.edu_level}</Col>
-            <Col span={8}>
-              <strong>基本工资:</strong>
-            </Col>
-            <Col span={16}>¥{record.base_salary}</Col>
-            <Col span={8}>
-              <strong>银行卡号:</strong>
-            </Col>
-            <Col span={16}>{record.card_num}</Col>
-            <Col span={8}>
-              <strong>邮箱:</strong>
-            </Col>
-            <Col span={16}>{record.email}</Col>
-            <Col span={8}>
-              <strong>联系电话:</strong>
-            </Col>
-            <Col span={16}>{record.phone}</Col>
-            <Col span={8}>
-              <strong>入职日期:</strong>
-            </Col>
-            <Col span={16}>{formatDate(record.entry_date)}</Col>
-          </Row>
-        </div>
-      ),
-    });
+  const handleSearch = (value) => {
+    setSearchValue(value);
+    loadData({ search: value });
   };
 
   // 编辑员工
   const handleEdit = (record) => {
-    setEditData(record);
-    setFormVisible(true);
+    setSelectedStaff(record);
+    setEditModalVisible(true);
   };
 
-  // 删除员工
-  const handleDelete = async (record) => {
-    const response = await staffService.deleteStaff(record.staff_id);
-    if (response.status) {
-      fetchStaffList(); // 重新加载列表
-    }
+  // 查看详情
+  const handleViewDetail = (record) => {
+    setSelectedStaff(record);
+    setDetailModalVisible(true);
   };
 
-  // 添加员工
-  const handleAdd = () => {
-    setEditData(null);
-    setFormVisible(true);
+  // 转正
+  const handlePromote = (record) => {
+    Modal.confirm({
+      title: "确认转正",
+      content: `确定将员工 ${record.staff_name} 转为正式员工？`,
+      onOk: async () => {
+        try {
+          await staffService.promote(record.staff_id);
+          message.success("转正成功");
+          loadData();
+        } catch (error) {
+          message.error("转正失败：" + error.message);
+        }
+      },
+    });
   };
 
-  // 表单操作成功回调
-  const handleFormSuccess = () => {
-    setFormVisible(false);
-    setEditData(null);
-    fetchStaffList(); // 重新加载列表
+  // 调岗
+  const handleTransfer = (record) => {
+    navigate("/staff/transfer", { state: { staffId: record.staff_id } });
   };
 
-  // 表单取消回调
-  const handleFormCancel = () => {
-    setFormVisible(false);
-    setEditData(null);
+  // 离职
+  const handleResign = (record) => {
+    Modal.confirm({
+      title: "确认离职",
+      content: `确定将员工 ${record.staff_name} 标记为离职？`,
+      onOk: async () => {
+        try {
+          await staffService.resign(record.staff_id);
+          message.success("离职成功");
+          loadData();
+        } catch (error) {
+          message.error("离职失败：" + error.message);
+        }
+      },
+    });
   };
 
-  // 导出Excel
-  const handleExport = async () => {
-    message.loading("正在导出...", 0);
-    const response = await staffService.exportExcel();
-
-    // 创建下载链接
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute(
-      "download",
-      `员工列表_${new Date().toISOString().slice(0, 10)}.xlsx`
-    );
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    message.destroy();
-    message.success("导出成功");
+  // 删除
+  const handleDelete = (record) => {
+    Modal.confirm({
+      title: "确认删除",
+      content: `确定删除员工 ${record.staff_name}？此操作不可撤销。`,
+      onOk: async () => {
+        try {
+          await staffService.deleteStaff(record.staff_id);
+          message.success("删除成功");
+          loadData();
+        } catch (error) {
+          message.error("删除失败：" + error.message);
+        }
+      },
+    });
   };
 
-  // 表格列配置 - 严格按照原有staff_manage.html的列配置
+  // 表格列定义
   const columns = [
     {
       title: "序号",
@@ -384,11 +305,11 @@ const StaffManagement = () => {
             type="link"
             size="small"
             icon={<EyeOutlined />}
-            onClick={() => handleView(record)}
+            onClick={() => handleViewDetail(record)}
           >
             查看
           </Button>
-          {hasPermission("staff.edit") && (
+          {hasPermission("update") && (
             <Button
               type="link"
               size="small"
@@ -398,7 +319,37 @@ const StaffManagement = () => {
               编辑
             </Button>
           )}
-          {hasPermission("staff.delete") && (
+          {hasPermission("update") && record.status === 0 && (
+            <Button
+              type="primary"
+              size="small"
+              icon={<CheckCircleOutlined />}
+              onClick={() => handlePromote(record)}
+            >
+              转正
+            </Button>
+          )}
+          {hasPermission("update") && record.status !== 2 && (
+            <Button
+              type="primary"
+              size="small"
+              icon={<SwapOutlined />}
+              onClick={() => handleTransfer(record)}
+            >
+              调岗
+            </Button>
+          )}
+          {hasPermission("update") && record.status !== 2 && (
+            <Button
+              type="danger"
+              size="small"
+              icon={<CloseCircleOutlined />}
+              onClick={() => handleResign(record)}
+            >
+              离职
+            </Button>
+          )}
+          {hasPermission("delete") && (
             <Popconfirm
               title="确认删除吗？"
               onConfirm={() => handleDelete(record)}
@@ -414,83 +365,50 @@ const StaffManagement = () => {
       ),
     },
   ];
-
+  console.log(data, "data");
   return (
-    <div>
-      {/* 搜索区域 */}
-      <Card className="search-form" style={{ marginBottom: 16 }}>
-        <Form form={form} layout="inline" onFinish={handleSearch}>
-          <Form.Item name="staff_name" label="员工姓名">
-            <Input
-              placeholder="请输入员工姓名"
-              allowClear
-              style={{ width: 200 }}
-            />
-          </Form.Item>
-          <Form.Item>
+    <div className="layui-container layuimini-container">
+      <div className="layui-main layuimini-main">
+        <Card title="员工管理">
+          <div style={{ marginBottom: 16 }}>
             <Space>
-              <Button
-                type="primary"
-                htmlType="submit"
-                icon={<SearchOutlined />}
+              <Search
+                placeholder="请输入员工姓名"
+                onSearch={handleSearch}
                 loading={searchLoading}
-              >
-                搜 索
-              </Button>
-              <Button onClick={handleReset} icon={<ReloadOutlined />}>
-                重 置
-              </Button>
+                style={{ width: 200 }}
+              />
             </Space>
-          </Form.Item>
-        </Form>
-      </Card>
+          </div>
+          <Table
+            columns={columns}
+            dataSource={data}
+            loading={loading}
+            pagination={pagination}
+            onChange={handleTableChange}
+            rowKey="staff_id"
+            scroll={{ x: "max-content" }}
+          />
+        </Card>
 
-      {/* 员工列表 */}
-      <Card
-        title="员工列表"
-        extra={
-          <Space>
-            {hasPermission("staff.create") && (
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAdd}
-              >
-                添加
-              </Button>
-            )}
-            <Button icon={<ExportOutlined />} onClick={handleExport}>
-              导出Excel
-            </Button>
-          </Space>
-        }
-      >
-        <Table
-          {...TABLE_CONFIG}
-          columns={columns}
-          dataSource={staffList}
-          loading={loading}
-          rowKey="staff_id"
-          pagination={{
-            ...pagination,
-            onChange: (page, pageSize) => {
-              setPagination((prev) => ({
-                ...prev,
-                current: page,
-                pageSize: pageSize,
-              }));
-            },
+        <StaffForm
+          visible={editModalVisible}
+          onCancel={() => setEditModalVisible(false)}
+          onSuccess={() => {
+            setEditModalVisible(false);
+            loadData();
           }}
+          editData={selectedStaff}
         />
-      </Card>
 
-      {/* 员工表单弹窗 */}
-      <StaffForm
-        visible={formVisible}
-        editData={editData}
-        onSuccess={handleFormSuccess}
-        onCancel={handleFormCancel}
-      />
+        <StaffForm
+          visible={detailModalVisible}
+          onCancel={() => setDetailModalVisible(false)}
+          onSuccess={() => setDetailModalVisible(false)}
+          editData={selectedStaff}
+          isReadOnly={true}
+        />
+      </div>
     </div>
   );
 };

@@ -35,6 +35,10 @@ import NotFound from "./components/Layout/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import { AuthProvider } from "./components/Auth/AuthContext";
 import CandidateInterview from "./pages/Candidate/CandidateInterview";
+import StaffOnboard from "./pages/Staff/StaffOnboard";
+import StaffPromotion from "./pages/Staff/StaffPromotion";
+import StaffTransfer from "./pages/Staff/StaffTransfer";
+import StaffResignation from "./pages/Staff/StaffResignation";
 
 // 配置全局message
 message.config({
@@ -59,6 +63,10 @@ function App() {
               />
               <Route path="staff/info" element={<StaffManagement />} />
               <Route path="staff/password" element={<PasswordManagement />} />
+              <Route path="staff/onboard" element={<StaffOnboard />} />
+              <Route path="staff/promotion" element={<StaffPromotion />} />
+              <Route path="staff/transfer" element={<StaffTransfer />} />
+              <Route path="staff/resign" element={<StaffResignation />} />
               <Route path="department" element={<DepartmentManagement />} />
               <Route path="rank" element={<RankManagement />} />
               <Route

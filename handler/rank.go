@@ -17,6 +17,7 @@ func init() {
 			rankGroup.DELETE("/del/:rank_id", RankDel)
 			rankGroup.POST("/edit", RankEdit)
 			rankGroup.GET("/query/:rank_id", RankQuery)
+			rankGroup.GET("/list", RankList)
 		}
 	})
 }
@@ -138,6 +139,19 @@ func RankQuery(c *gin.Context) {
 	}
 	total = int64(len(ranks))
 
+	sendTotalSuccess(c, ranks, total, "")
+}
+
+// RankList godoc
+// @Summary 获取职级列表
+// @Tags Rank
+// @Accept json
+// @Produce json
+// @Router /api/rank/list [get]
+func RankList(c *gin.Context) {
+	var ranks []model.Rank
+	resource.HrmsDB(c).Find(&ranks)
+	total := int64(len(ranks))
 	sendTotalSuccess(c, ranks, total, "")
 }
 

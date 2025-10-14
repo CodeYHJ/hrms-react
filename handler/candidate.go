@@ -20,6 +20,8 @@ func init() {
 		candidateGroup.GET("/query_by_staff_id/:staff_id", GetCandidateByStaffId)
 		candidateGroup.GET("/reject/:id", SetCandidateRejectById)
 		candidateGroup.GET("/accept/:id", SetCandidateAcceptById)
+		candidateGroup.POST("/send_offer/:id", SendOffer)
+		candidateGroup.POST("/accept_offer/:id", AcceptOffer)
 	})
 }
 
@@ -219,4 +221,52 @@ func SetCandidateAcceptById(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"status": 2000,
 	})
+}
+
+// 发送offer
+// @Summary 发送offer
+// @Tags 候选人管理
+// @Accept json
+// @Produce json
+// @Param id path string true "候选人ID"
+// @Router /api/candidate/send_offer/{id} [post]
+func SendOffer(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Printf("[SendOffer] err = %v", err)
+		sendFail(c, 5001, "参数错误")
+		return
+	}
+	err = service.SetCandidateStatus(c, int64(id), 3)
+	if err != nil {
+		log.Printf("[SendOffer] err = %v", err)
+		sendFail(c, 5002, "发送offer失败"+err.Error())
+		return
+	}
+	sendSuccess(c, nil, "offer已发送")
+}
+
+// 接受offer
+// @Summary 接受offer
+// @Tags 候选人管理
+// @Accept json
+// @Produce json
+// @Param id path string true "候选人ID"
+// @Router /api/candidate/accept_offer/{id} [post]
+func AcceptOffer(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Printf("[AcceptOffer] err = %v", err)
+		sendFail(c, 5001, "参数错误")
+		return
+	}
+	err = service.SetCandidateStatus(c, int64(id), 4)
+	if err != nil {
+		log.Printf("[AcceptOffer] err = %v", err)
+		sendFail(c, 5002, "接受offer失败"+err.Error())
+		return
+	}
+	sendSuccess(c, nil, "offer已接受")
 }

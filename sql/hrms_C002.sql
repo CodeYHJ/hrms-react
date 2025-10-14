@@ -245,14 +245,18 @@ CREATE TABLE `staff` (
                          `dep_id` varchar(32) NOT NULL COMMENT '部门ID',
                          `email` varchar(32) NOT NULL COMMENT '电子邮箱',
                          `phone` bigint NOT NULL COMMENT '手机号',
-                         `entry_date` date NOT NULL COMMENT '入职日期',
+                          `entry_date` date NOT NULL COMMENT '入职日期',
+                          `status` int NOT NULL DEFAULT 0 COMMENT '状态: 0=试用, 1=正式, 2=离职',
+                          `probation_end_date` date DEFAULT NULL COMMENT '试用期结束日期',
+                          `resignation_date` date DEFAULT NULL COMMENT '离职日期',
+                          `resignation_reason` text COMMENT '离职原因',
                          `created_at` datetime DEFAULT NULL,
                          `updated_at` datetime DEFAULT NULL,
                          `deleted_at` datetime DEFAULT NULL,
                          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `staff` VALUES (1,'root','超级管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',NULL,NULL,NULL),(2,'admin','系统管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',NULL,NULL,NULL),(11,'H14774','彭博荣','H22024','王明','1999-05-21','433334199905215517',1,'汉族','清华大学','机械设计制造及其自动化','本科',5996,'611116161115151515','rank_32826814','dep_1322682358','gdutarong2@161.com',15521306934,'2021-02-24','2021-03-13 14:40:56','2021-04-15 11:00:16',NULL),(17,'H14466','李丽',NULL,NULL,'1999-05-21','433334199905215500',2,'汉族','清华大学','网络工程','博士',5000,'611116161115151515','rank_1110616701','dep_1460851561','gdutarong@163.com',18823042440,'2021-02-24','2021-03-23 10:12:30','2021-04-10 19:05:32',NULL),(18,'H22024','王明','H14466','李丽','1999-05-21','433333199905215517',1,'汉族','清华大学','计算机','本科及以上',4500,'611116161115151515','rank_3404026447','dep_2547022224','gdutarong@163.com',19927454324,'2021-01-02','2021-03-28 18:11:35','2021-04-15 11:03:10',NULL),(26,'H27826','李华','H14774','彭博荣','1997-02-27','433334199905215333',1,'汉族','清华大学','机械自动化','博士',19900,'611116161115151515','rank_3404026447','dep_2547022224','1378789620@qq.com',15521306932,'2021-04-17','2021-04-17 16:55:04','2021-05-27 13:03:12',NULL);
+-- INSERT INTO `staff` VALUES (1,'root','超级管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',0,NULL,NULL,NULL,NULL,NULL,NULL),(2,'admin','系统管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',0,NULL,NULL,NULL,NULL,NULL,NULL),(11,'H14774','彭博荣','H22024','王明','1999-05-21','433334199905215517',1,'汉族','清华大学','机械设计制造及其自动化','本科',5996,'611116161115151515','rank_32826814','dep_1322682358','gdutarong2@161.com',15521306934,'2021-02-24',1,'2021-03-13',NULL,NULL,NULL,NULL),(17,'H14466','李丽',NULL,NULL,'1999-05-21','433334199905215500',2,'汉族','清华大学','网络工程','博士',5000,'611116161115151515','rank_1110616701','dep_1460851561','gdutarong@163.com',18823042440,'2021-02-24',1,'2021-03-23',NULL,NULL,NULL,NULL),(18,'H22024','王明','H14466','李丽','1999-05-21','433333199905215517',1,'汉族','清华大学','计算机','本科及以上',4500,'611116161115151515','rank_3404026447','dep_2547022224','gdutarong@163.com',19927454324,'2021-01-02',1,'2021-03-28',NULL,NULL,NULL,NULL),(26,'H27826','李华','H14774','彭博荣','1997-02-27','433334199905215333',1,'汉族','清华大学','机械自动化','博士',19900,'611116161115151515','rank_3404026447','dep_2547022224','1378789620@qq.com',15521306932,'2021-04-17',1,'2021-04-17',NULL,NULL,NULL,NULL);
 
 -- 创建操作日志表
 CREATE TABLE operation_log (
@@ -279,6 +283,24 @@ CREATE TABLE operation_log (
     INDEX idx_operation_time (operation_time),
     INDEX idx_operation_status (operation_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
+
+-- 创建员工生命周期日志表
+CREATE TABLE staff_lifecycle_log (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    staff_id VARCHAR(50) NOT NULL COMMENT '员工ID',
+    action_type VARCHAR(20) NOT NULL COMMENT '操作类型: onboard=入职, promote=转正, transfer=调岗, resign=离职',
+    old_value TEXT COMMENT '操作前值 (JSON格式, 如旧部门/职级)',
+    new_value TEXT COMMENT '操作后值 (JSON格式, 如新部门/职级)',
+    action_date DATETIME NOT NULL COMMENT '操作日期',
+    operator VARCHAR(50) COMMENT '操作人员ID',
+    remark TEXT COMMENT '备注',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_staff_id (staff_id),
+    INDEX idx_action_type (action_type),
+    INDEX idx_action_date (action_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='员工生命周期日志表';
+
 
 
 -- 更新attendance_record表
@@ -389,8 +411,18 @@ WHERE
 UPDATE staff 
 SET 
 entry_date = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
-    created_at = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
-    updated_at = DATE_ADD(updated_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(updated_at) + (2025 - YEAR(CURRENT_DATE)) YEAR)
+created_at = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
+updated_at = DATE_ADD(updated_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(updated_at) + (2025 - YEAR(CURRENT_DATE)) YEAR)
 WHERE 
-    created_at IS NOT NULL 
-    AND updated_at IS NOT NULL;
+created_at IS NOT NULL 
+AND updated_at IS NOT NULL;
+
+-- 更新staff_lifecycle_log表
+UPDATE staff_lifecycle_log 
+SET 
+action_date = DATE_ADD(action_date, INTERVAL YEAR(CURRENT_DATE) - YEAR(action_date) + (2025 - YEAR(CURRENT_DATE)) YEAR),
+created_at = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
+updated_at = DATE_ADD(updated_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(updated_at) + (2025 - YEAR(CURRENT_DATE)) YEAR)
+WHERE 
+created_at IS NOT NULL 
+AND updated_at IS NOT NULL;

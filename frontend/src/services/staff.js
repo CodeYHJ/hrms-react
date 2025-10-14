@@ -66,6 +66,42 @@ export const staffService = {
 
     },
 
+    // 员工入职
+    onboardStaff: async (staffData) => {
+        const response = await api.post('/staff/onboard', staffData)
+        return response
+    },
+
+    // 员工转正
+    promoteStaff: async (staffData) => {
+        const response = await api.post('/staff/promote', staffData)
+        return response
+    },
+
+    // 员工调岗
+    transferStaff: async (staffData) => {
+        const response = await api.post('/staff/transfer', staffData)
+        return response
+    },
+
+    // 员工离职
+    resignStaff: async (staffData) => {
+        const response = await api.post('/staff/resign', staffData)
+        return response
+    },
+
+    // 获取所有部门
+    getAllDepartments: async () => {
+        const response = await api.get('/depart/list')
+        return response
+    },
+
+    // 获取所有职级
+    getAllRanks: async () => {
+        const response = await api.get('/rank/list')
+        return response
+    },
+
     // 密码管理相关
     password: {
         // 获取密码列表
@@ -100,5 +136,11 @@ export const staffService = {
             const response = await api.post(`/authority/set_normal/${staffId}`)
             return response
         }
+    },
+
+    // 分页查询员工列表
+    list: async (params = {}) => {
+        const response = await api.get('/staff/list', { params })
+        return response
     }
 }

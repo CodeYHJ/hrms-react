@@ -7,6 +7,8 @@ import {
   EditOutlined,
   DeleteOutlined,
   UserOutlined,
+  CheckCircleOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 import { usePermission } from "../../components/Auth/usePermission";
 import { candidateService } from "../../services/candidate";
@@ -102,11 +104,17 @@ const CandidateManagement = () => {
       render: (status) => {
         switch (status) {
           case 0:
-            return <span style={{ color: "blue" }}>面试中</span>;
+            return <span style={{ color: "blue" }}>待处理</span>;
           case 1:
-            return <span style={{ color: "red" }}>已拒绝</span>;
+            return <span style={{ color: "orange" }}>面试中</span>;
           case 2:
             return <span style={{ color: "green" }}>已录取</span>;
+          case 3:
+            return <span style={{ color: "purple" }}>offer已发送</span>;
+          case 4:
+            return <span style={{ color: "green" }}>接受offer</span>;
+          case 5:
+            return <span style={{ color: "red" }}>拒绝offer</span>;
           default:
             return "未知状态";
         }
@@ -153,6 +161,28 @@ const CandidateManagement = () => {
                 onClick={() => handleEdit(record)}
               >
                 编辑
+              </Button>
+            )}
+
+            {hasPermission("update") && status === 2 && (
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                onClick={() => handleAccept(record)}
+              >
+                发送offer
+              </Button>
+            )}
+
+            {hasPermission("update") && status === 3 && (
+              <Button
+                type="primary"
+                size="small"
+                icon={<UserAddOutlined />}
+                onClick={() => handleAcceptOffer(record)}
+              >
+                接受offer
               </Button>
             )}
 
@@ -233,6 +263,30 @@ const CandidateManagement = () => {
   const handleInterview = (record) => {
     sessionStorage.setItem("candidate_interview_info", JSON.stringify(record));
     navigate("/candidate/interview");
+  };
+
+  // 录取候选人
+  const handleAccept = async (record) => {
+    console.log(record, "record");
+    try {
+      await candidateService.sendOffer(record.ID);
+      message.success("offer已发送");
+      loadCandidates();
+    } catch (error) {
+      message.error("发送offer失败：" + error.message);
+    }
+  };
+
+  // 接受offer
+  const handleAcceptOffer = async (record) => {
+    try {
+      await candidateService.acceptOffer(record.ID);
+      message.success("offer已接受");
+      loadCandidates();
+      navigate("/staff/onboard", { state: { candidate: record } });
+    } catch (error) {
+      message.error("接受offer失败：" + error.message);
+    }
   };
 
   // 删除候选人

@@ -160,3 +160,125 @@ func MD5(input string) string {
 	cipherStr := md5Ctx.Sum(nil)
 	return hex.EncodeToString(cipherStr)
 }
+
+// 员工入职
+func OnboardStaff(c *gin.Context, dto *model.StaffOnboardDTO, operatorId string) error {
+	var staffRecord model.Staff
+	Transfer(&dto, &staffRecord)
+	staffRecord.Status = 0 // 试用期
+	staffRecord.StaffId = RandomID("H")
+	
+	if err := resource.HrmsDB(c).Create(&staffRecord).Error; err != nil {
+		log.Printf("OnboardStaff err = %v", err)
+		return err
+	}
+	
+	// 记录生命周期日志
+	logRecord := model.StaffLifecycleLog{
+		StaffId:    staffRecord.StaffId,
+		ActionType: "onboard",
+		ActionDate: time.Now(),
+		OldValue:   "{}",
+		NewValue:   fmt.Sprintf(`{"staff_id":"%s","status":0}`, staffRecord.StaffId),
+		Operator:   operatorId,
+		Remark:     "员工入职",
+	}
+	
+	if err := resource.HrmsDB(c).Create(&logRecord).Error; err != nil {
+		log.Printf("OnboardStaff log err = %v", err)
+		// 注意：这里不返回错误，因为主要业务已成功
+	}
+	
+	return nil
+}
+
+// 员工转正
+func PromoteStaff(c *gin.Context, dto *model.StaffPromotionDTO, operatorId string) error {
+	if err := resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", dto.StaffId).
+		Updates(map[string]interface{}{
+			"status": 1,
+			"probation_end_date": dto.ProbationEndDate,
+		}).Error; err != nil {
+		log.Printf("PromoteStaff err = %v", err)
+		return err
+	}
+	
+	// 记录生命周期日志
+	logRecord := model.StaffLifecycleLog{
+		StaffId:    dto.StaffId,
+		ActionType: "promote",
+		ActionDate: time.Now(),
+		OldValue:   fmt.Sprintf(`{"status":0}`),
+		NewValue:   fmt.Sprintf(`{"status":1,"probation_end_date":"%s"}`, dto.ProbationEndDate),
+		Operator:   operatorId,
+		Remark:     "员工转正",
+	}
+	
+	if err := resource.HrmsDB(c).Create(&logRecord).Error; err != nil {
+		log.Printf("PromoteStaff log err = %v", err)
+		// 注意：这里不返回错误，因为主要业务已成功
+	}
+	
+	return nil
+}
+
+// 员工调岗
+func TransferStaff(c *gin.Context, dto *model.StaffTransferDTO, operatorId string) error {
+	if err := resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", dto.StaffId).
+		Updates(map[string]interface{}{
+			"dep_id": dto.DepId,
+			"rank_id": dto.RankId,
+		}).Error; err != nil {
+		log.Printf("TransferStaff err = %v", err)
+		return err
+	}
+	
+	// 记录生命周期日志
+	logRecord := model.StaffLifecycleLog{
+		StaffId:    dto.StaffId,
+		ActionType: "transfer",
+		ActionDate: time.Now(),
+		OldValue:   fmt.Sprintf(`{"dep_id":"%s","rank_id":"%s"}`, "", ""),
+		NewValue:   fmt.Sprintf(`{"dep_id":"%s","rank_id":"%s"}`, dto.DepId, dto.RankId),
+		Operator:   operatorId,
+		Remark:     "员工调岗",
+	}
+	
+	if err := resource.HrmsDB(c).Create(&logRecord).Error; err != nil {
+		log.Printf("TransferStaff log err = %v", err)
+		// 注意：这里不返回错误，因为主要业务已成功
+	}
+	
+	return nil
+}
+
+// 员工离职
+func ResignStaff(c *gin.Context, dto *model.StaffResignationDTO, operatorId string) error {
+	if err := resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", dto.StaffId).
+		Updates(map[string]interface{}{
+			"status": 2,
+			"resignation_date": dto.ResignationDate,
+			"resignation_reason": dto.ResignationReason,
+		}).Error; err != nil {
+		log.Printf("ResignStaff err = %v", err)
+		return err
+	}
+	
+	// 记录生命周期日志
+	logRecord := model.StaffLifecycleLog{
+		StaffId:    dto.StaffId,
+		ActionType: "resign",
+		ActionDate: time.Now(),
+		OldValue:   fmt.Sprintf(`{"status":0}`),
+		NewValue:   fmt.Sprintf(`{"status":2,"resignation_date":"%s","resignation_reason":"%s"}`, dto.ResignationDate, dto.ResignationReason),
+		Operator:   operatorId,
+		Remark:     "员工离职",
+	}
+	
+	if err := resource.HrmsDB(c).Create(&logRecord).Error; err != nil {
+		log.Printf("ResignStaff log err = %v", err)
+		// 注意：这里不返回错误，因为主要业务已成功
+	}
+	
+	return nil
+}
