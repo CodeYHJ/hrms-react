@@ -22,7 +22,9 @@ import CandidateForm from "./pages/Candidate/CandidateForm";
 import CandidateDetail from "./pages/Candidate/CandidateDetail";
 import RankManagement from "./pages/Rank/RankManagement";
 import SalaryGiving from "./pages/Salary/SalaryGiving";
+import SalaryGivingDetail from "./pages/Salary/SalaryGivingDetail";
 import SalaryDetail from "./pages/Salary/SalaryDetail";
+import SalaryDetailForm from "./pages/Salary/SalaryDetailForm";
 import SalaryHistory from "./pages/Salary/SalaryHistory";
 import ExamInfo from "./pages/Exam/ExamInfo";
 import ExamHistory from "./pages/Exam/ExamHistory";
@@ -39,7 +41,7 @@ import StaffOnboard from "./pages/Staff/StaffOnboard";
 import StaffPromotion from "./pages/Staff/StaffPromotion";
 import StaffTransfer from "./pages/Staff/StaffTransfer";
 import StaffResignation from "./pages/Staff/StaffResignation";
-
+import AttendanceForm from "./pages/Attendance/AttendanceForm";
 // 配置全局message
 message.config({
   top: 100,
@@ -81,9 +83,14 @@ function App() {
                 path="attendance/approve"
                 element={<AttendanceApproval />}
               />
-              <Route path="salary/giving" element={<SalaryGiving />} />
-              <Route path="salary/detail" element={<SalaryDetail />} />
-              <Route path="salary/history" element={<SalaryHistory />} />
+              <Route path="attendance/add" element={<AttendanceForm />} />
+              <Route path="attendance/edit" element={<AttendanceForm />} />
+               <Route path="salary/giving" element={<SalaryGiving />} />
+               <Route path="salary/giving/detail" element={<SalaryGivingDetail />} />
+               <Route path="salary/detail" element={<SalaryDetail />} />
+               <Route path="salary/detail/add" element={<SalaryDetailForm />} />
+               <Route path="salary/detail/edit" element={<SalaryDetailForm />} />
+               <Route path="salary/history" element={<SalaryHistory />} />
               <Route path="exam/manage" element={<ExamInfo />} />
               <Route path="exam/history" element={<ExamHistory />} />
               <Route path="notification" element={<NotificationManagement />} />

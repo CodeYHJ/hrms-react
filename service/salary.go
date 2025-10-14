@@ -3,10 +3,11 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"hrms/model"
 	"hrms/resource"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreateSalary(c *gin.Context, dto *model.SalaryCreateDTO) error {
@@ -37,11 +38,17 @@ func DelSalaryBySalaryId(c *gin.Context, salaryId string) error {
 func UpdateSalaryById(c *gin.Context, dto *model.SalaryEditDTO) error {
 	var salary model.Salary
 	Transfer(&dto, &salary)
-	if err := resource.HrmsDB(c).Model(&model.Salary{}).Where("id = ?", salary.ID).
-		Update("staff_id", salary.StaffId).
-		Update("staff_name", salary.StaffName).
-		Update("base", salary.Base).
-		Update("subsidy", salary.Subsidy).
+	if err := resource.HrmsDB(c).Model(&model.Salary{}).Where("id = ?", dto.Id).
+		Updates(map[string]interface{}{
+			"staff_id":   salary.StaffId,
+			"staff_name": salary.StaffName,
+			"base":       salary.Base,
+			"subsidy":    salary.Subsidy,
+			"bonus":      salary.Bonus,
+			"commission": salary.Commission,
+			"other":      salary.Other,
+			"fund":       salary.Fund,
+		}).
 		Error; err != nil {
 		log.Printf("UpdateSalaryById err = %v", err)
 		return err
@@ -52,6 +59,7 @@ func UpdateSalaryById(c *gin.Context, dto *model.SalaryEditDTO) error {
 func GetSalaryByStaffId(c *gin.Context, staffId string, start int, limit int) ([]*model.Salary, int64, error) {
 	var salarys []*model.Salary
 	var err error
+	fmt.Printf("GetSalaryByStaffId staffId = %v, start = %v, limit = %v", staffId, start, limit)
 	if start == -1 && limit == -1 {
 		// 不加分页
 		if staffId != "all" {

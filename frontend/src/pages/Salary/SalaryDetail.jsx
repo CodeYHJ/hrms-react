@@ -16,6 +16,7 @@ import {
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { usePermission } from "../../components/Auth/usePermission";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
 import { salaryService } from "../../services/salary";
@@ -31,6 +32,7 @@ const SalaryDetail = () => {
     ...PAGINATION_CONFIG,
     total: 0,
   });
+  const navigate = useNavigate();
 
   const { hasPermission } = usePermission();
 
@@ -185,7 +187,7 @@ const SalaryDetail = () => {
   // 编辑
   const handleEdit = (record) => {
     localStorage.setItem("salary_edit_info", JSON.stringify(record));
-    window.open("/views/salary_detail_edit.html", "_blank");
+    navigate("/salary/detail/edit");
   };
 
   // 删除
@@ -199,7 +201,7 @@ const SalaryDetail = () => {
 
   // 添加
   const handleAdd = () => {
-    window.open("/views/salary_detail_add.html", "_blank");
+    navigate("/salary/detail/add");
   };
 
   // 刷新数据

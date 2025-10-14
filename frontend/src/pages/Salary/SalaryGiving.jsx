@@ -9,6 +9,7 @@ import {
   Space,
   Popconfirm,
 } from "antd";
+import { useNavigate } from "react-router-dom";
 import {
   SearchOutlined,
   ReloadOutlined,
@@ -31,6 +32,7 @@ const SalaryGiving = () => {
     total: 0,
   });
 
+  const navigate = useNavigate();
   const { hasPermission } = usePermission();
 
   // 表格列定义
@@ -242,8 +244,8 @@ const SalaryGiving = () => {
   const handleView = (record) => {
     // 存储数据到localStorage供详情页面使用
     localStorage.setItem("salary_giving_info", JSON.stringify(record));
-    // 打开新窗口显示详情
-    window.open("/app/salary_giving_detail.html", "_blank");
+    // 导航到详情页面
+    navigate("/salary/giving/detail");
   };
 
   // 发放薪资

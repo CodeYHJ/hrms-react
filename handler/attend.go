@@ -52,15 +52,15 @@ func CreateAttendRecord(c *gin.Context) {
 	staffId := getCurrentStaffId(c)
 	staffName := getCurrentStaffName(c)
 
-	// 业务处理
-	err := service.CreateAttendanceRecord(c, &dto)
-	if err != nil {
-		log.Printf("[CreateAttendRecord] err = %v", err)
-		LogOperationFailure(c, staffId, staffName, "CREATE", "ATTENDANCE",
-			"创建考勤记录失败: "+dto.StaffName+"-"+dto.Date, err.Error())
-		sendFail(c, 5001, "上报失败")
-		return
-	}
+  // 业务处理
+  err := service.CreateAttendanceRecord(c, &dto)
+  if err != nil {
+    log.Printf("[CreateAttendRecord] err = %v", err)
+    LogOperationFailure(c, staffId, staffName, "CREATE", "ATTENDANCE",
+      "创建考勤记录失败: "+dto.StaffName+"-"+dto.Date, err.Error())
+    sendFail(c, 5001, err.Error())
+    return
+  }
 
 	LogOperationSuccess(c, staffId, staffName, "CREATE", "ATTENDANCE",
 		"创建考勤记录成功: "+dto.StaffName+"-"+dto.Date)

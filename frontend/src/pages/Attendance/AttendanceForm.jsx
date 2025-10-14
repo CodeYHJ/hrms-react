@@ -41,28 +41,33 @@ const AttendanceForm = () => {
   // 表单提交处理
   const handleSubmit = async (values) => {
     setLoading(true);
-    let response;
 
-    if (isEdit) {
-      // 获取存储的考勤信息
-      const attendanceInfo = JSON.parse(
-        sessionStorage.getItem("attendance_edit_info")
-      );
-      response = await attendanceService.editAttendanceRecord({
-        attendance_id: attendanceInfo.attendance_id,
-        ...values,
-      });
-    } else {
-      response = await attendanceService.createAttendanceRecord(values);
-    }
+    const serviceCall = isEdit
+      ? attendanceService.editAttendanceRecord({
+          attendance_id: JSON.parse(sessionStorage.getItem("attendance_edit_info")).attendance_id,
+          ...values,
+        })
+      : attendanceService.createAttendanceRecord(values);
 
-    if (response.status) {
-      if (isEdit) {
-        sessionStorage.removeItem("attendance_edit_info");
+    serviceCall.then(response => {
+      if (response.status) {
+        message.success("添加成功");
+        if (isEdit) {
+          sessionStorage.removeItem("attendance_edit_info");
+        }
+        navigate("/attendance/record");
+      } else {
+        if (response.message && response.message.includes("已存在")) {
+          message.error("当月出勤数据已存在");
+        } else {
+          message.error("系统异常,添加失败");
+        }
       }
-      navigate("/attendance/manage");
-    }
-    setLoading(false);
+    }).catch(error => {
+      message.error("系统异常,添加失败: " + error.message);
+    }).finally(() => {
+      setLoading(false);
+    });
   };
 
   // 取消返回
@@ -70,7 +75,7 @@ const AttendanceForm = () => {
     if (isEdit) {
       sessionStorage.removeItem("attendance_edit_info");
     }
-    navigate("/attendance/manage");
+    navigate("/attendance/record");
   };
 
   return (

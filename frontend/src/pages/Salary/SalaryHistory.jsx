@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Card, Form, Input, Button, message, Space } from "antd";
 import { SearchOutlined, ReloadOutlined, EyeOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { usePermission } from "../../components/Auth/usePermission";
 import { PAGINATION_CONFIG, TABLE_CONFIG } from "../../utils/constants";
 import { salaryService } from "../../services/salary";
@@ -15,6 +16,7 @@ const SalaryHistory = () => {
     total: 0,
   });
 
+  const navigate = useNavigate();
   const { hasPermission } = usePermission();
 
   // 表格列定义
@@ -210,7 +212,7 @@ const SalaryHistory = () => {
   // 查看详情
   const handleView = (record) => {
     localStorage.setItem("salary_giving_info", JSON.stringify(record));
-    window.open("/app/salary_giving_detail.html", "_blank");
+    navigate("/salary/giving/detail");
   };
 
   // 刷新数据
