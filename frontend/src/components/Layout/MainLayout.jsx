@@ -12,6 +12,7 @@ import {
   ClockCircleOutlined,
   DollarOutlined,
   NotificationOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../Auth/AuthContext";
@@ -188,6 +189,15 @@ const MainLayout = ({ children }) => {
             label: "角色权限管理",
           },
         ],
+      });
+    }
+
+    // 操作日志（超级管理员和系统管理员）
+    if (canAccessModule("operation_log")) {
+      items.push({
+        key: "/operation-log",
+        icon: <FileTextOutlined />,
+        label: "操作日志",
       });
     }
 

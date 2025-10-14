@@ -2,6 +2,7 @@ package handler
 
 import (
 	"hrms/model"
+	"hrms/resource"
 	"hrms/service"
 	"log"
 	"strconv"
@@ -39,24 +40,29 @@ func init() {
 func DelSalary(c *gin.Context) {
 	// 参数绑定
 	salaryId := c.Param("salary_id")
+	
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
+	// 查询要删除的薪资信息用于日志记录
+	var salary model.Salary
+	resource.HrmsDB(c).Where("salary_id = ?", salaryId).First(&salary)
+	
 	// 业务处理
 	err := service.DelSalaryBySalaryId(c, salaryId)
 	if err != nil {
 		// 记录错误日志
 		log.Printf("[DelSalary] err = %v", err)
-		// 返回错误信息
-		// c.JSON(200, gin.H{
-		// 	"status": 5002,
-		// 	"result": err.Error(),
-		// })
+		LogOperationFailure(c, staffId, staffName, "DELETE", "SALARY", 
+			"删除薪资失败: "+salary.StaffName, err.Error())
 		sendFail(c, 5002, "删除失败"+err.Error())
 		return
 	}
+	
+	LogOperationSuccess(c, staffId, staffName, "DELETE", "SALARY", 
+		"删除薪资成功: "+salary.StaffName)
 	sendSuccess(c, nil, "删除成功")
-	// 返回成功信息
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 }
 
 // 创建薪资信息
@@ -71,29 +77,33 @@ func CreateSalary(c *gin.Context) {
 	// 参数绑定
 	var dto model.SalaryCreateDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "SALARY", 
+			"创建薪资失败", err.Error())
 		log.Printf("[CreateSalary] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5001,
-		// 	"result": err.Error(),
-		// })
 		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
+	
+	// 获取操作用户信息用于成功日志
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
 	// 业务处理
 	err := service.CreateSalary(c, &dto)
 	if err != nil {
 		log.Printf("[CreateSalary] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5002,
-		// 	"result": err.Error(),
-		// })
+		LogOperationFailure(c, staffId, staffName, "CREATE", "SALARY", 
+			"创建薪资失败: "+dto.StaffName, err.Error())
 		sendFail(c, 5002, "添加失败"+err.Error())
 		return
 	}
+	
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "SALARY", 
+		"创建薪资成功: "+dto.StaffName)
 	sendSuccess(c, nil, "添加成功")
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 }
 
 // 修改薪资信息
@@ -108,29 +118,37 @@ func UpdateSalaryById(c *gin.Context) {
 	// 参数绑定
 	var dto model.SalaryEditDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "SALARY", 
+			"编辑薪资失败", err.Error())
 		log.Printf("[UpdateSalaryById] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5001,
-		// 	"result": err.Error(),
-		// })
 		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
+	
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
+	// 查询原薪资信息用于日志记录
+	var originalSalary model.Salary
+	resource.HrmsDB(c).Where("id = ?", dto.Id).First(&originalSalary)
+	
 	// 业务处理
 	err := service.UpdateSalaryById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateSalaryById] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5002,
-		// 	"result": err.Error(),
-		// })
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "SALARY", 
+			"编辑薪资失败: "+originalSalary.StaffName, err.Error())
 		sendFail(c, 5002, "编辑失败"+err.Error())
 		return
 	}
+	
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "SALARY", 
+		"编辑薪资成功: "+originalSalary.StaffName)
 	sendSuccess(c, nil, "编辑成功")
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 }
 
 // 根据员工ID查询薪资信息
@@ -285,19 +303,34 @@ func GetSalaryRecordIsPayById(c *gin.Context) {
 // @Router /api/salary_record/pay_salary_record_by_id/{id} [get]
 func PaySalaryRecordById(c *gin.Context) {
 	idStr := c.Param("id")
+	
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "SALARY", 
+			"发放薪资失败", err.Error())
 		sendFail(c, 5001, "发放失败"+err.Error())
 		return
 	}
+	
+	// 查询薪资记录信息用于日志记录
+	var salaryRecord model.SalaryRecord
+	resource.HrmsDB(c).Where("id = ?", id).First(&salaryRecord)
+	
 	err = service.PaySalaryRecordById(c, int64(id))
 	if err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "SALARY", 
+			"发放薪资失败: "+salaryRecord.StaffName, err.Error())
 		sendFail(c, 5002, "发放失败"+err.Error())
-
 		return
 	}
+	
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "SALARY", 
+		"发放薪资成功: "+salaryRecord.StaffName)
 	sendSuccess(c, nil, "发放成功")
-
 }
 
 // 根据员工ID查询已发放薪资记录

@@ -55,5 +55,17 @@ export const candidateService = {
             status: status
         })
         return response
+    },
+
+    // 拒绝候选人
+    rejectCandidate: async (candidateId) => {
+        const response = await api.get(`/candidate/reject/${candidateId}`)
+        return response
+    },
+
+    // 录取候选人
+    acceptCandidate: async (candidateId) => {
+        const response = await api.get(`/candidate/accept/${candidateId}`)
+        return response
     }
 }

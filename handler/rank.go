@@ -31,13 +31,25 @@ func init() {
 func RankCreate(c *gin.Context) {
 	var rankCreateDto model.RankCreateDTO
 	if err := c.BindJSON(&rankCreateDto); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "RANK", 
+			"创建职级失败", err.Error())
 		log.Printf("[RankCreate] err = %v", err)
 		sendFail(c, 5001, err.Error())
 		return
 	}
+	
+	// 获取操作用户信息用于成功日志
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
 	var exist int64
 	resource.HrmsDB(c).Model(&model.Rank{}).Where("rank_name = ?", rankCreateDto.RankName).Count(&exist)
 	if exist != 0 {
+		LogOperationFailure(c, staffId, staffName, "CREATE", "RANK", 
+			"创建职级失败: "+rankCreateDto.RankName, "职级名称已存在")
 		sendFail(c, 2001, "职级名称已存在")
 		return
 	}
@@ -47,6 +59,8 @@ func RankCreate(c *gin.Context) {
 	}
 	resource.HrmsDB(c).Create(&rank)
 
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "RANK", 
+		"创建职级成功: "+rankCreateDto.RankName)
 	sendSuccess(c, rank, "新增职级成功")
 }
 
@@ -60,12 +74,29 @@ func RankCreate(c *gin.Context) {
 func RankEdit(c *gin.Context) {
 	var rankEditDTO model.RankEditDTO
 	if err := c.BindJSON(&rankEditDTO); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "RANK", 
+			"编辑职级失败", err.Error())
 		log.Printf("[RankEdit] err = %v", err)
 		sendFail(c, 5001, "编辑职级失败")
 		return
 	}
+	
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
+	// 查询原职级信息用于日志记录
+	var originalRank model.Rank
+	resource.HrmsDB(c).Where("rank_id = ?", rankEditDTO.RankId).First(&originalRank)
+	
 	resource.HrmsDB(c).Model(&model.Rank{}).Where("rank_id = ?", rankEditDTO.RankId).
 		Updates(&model.Rank{RankName: rankEditDTO.RankName})
+	
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "RANK", 
+		"编辑职级成功: "+originalRank.RankName)
 	sendSuccess(c, nil, "编辑职级成功")
 }
 
@@ -119,10 +150,24 @@ func RankQuery(c *gin.Context) {
 // @Router /api/rank/{rank_id}/del [delete]
 func RankDel(c *gin.Context) {
 	rankId := c.Param("rank_id")
+	
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
+	// 查询要删除的职级信息用于日志记录
+	var rank model.Rank
+	resource.HrmsDB(c).Where("rank_id = ?", rankId).First(&rank)
+	
 	if err := resource.HrmsDB(c).Where("rank_id = ?", rankId).Delete(&model.Rank{}).Error; err != nil {
 		log.Printf("[RankDel] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "DELETE", "RANK", 
+			"删除职级失败: "+rank.RankName, err.Error())
 		sendFail(c, 5001, err.Error())
 		return
 	}
+	
+	LogOperationSuccess(c, staffId, staffName, "DELETE", "RANK", 
+		"删除职级成功: "+rank.RankName)
 	sendSuccess(c, nil, "删除成功")
 }

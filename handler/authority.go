@@ -2,6 +2,7 @@ package handler
 
 import (
 	"hrms/model"
+	"hrms/resource"
 	"hrms/service"
 	"log"
 
@@ -30,6 +31,11 @@ func init() {
 func AddAuthorityDetail(c *gin.Context) {
 	var authorityDetailDTO model.AddAuthorityDetailDTO
 	if err := c.ShouldBindJSON(&authorityDetailDTO); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "AUTHORITY",
+			"创建权限配置失败", err.Error())
 		log.Printf("[AddAuthorityDetail] err = %v", err)
 		c.JSON(200, gin.H{
 			"status": 5001,
@@ -37,15 +43,25 @@ func AddAuthorityDetail(c *gin.Context) {
 		})
 		return
 	}
+
+	// 获取操作用户信息用于成功日志
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
 	err := service.AddAuthorityDetail(c, &authorityDetailDTO)
 	if err != nil {
 		log.Printf("[AddAuthorityDetail] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "AUTHORITY",
+			"创建权限配置失败: "+authorityDetailDTO.UserType+"-"+authorityDetailDTO.Model, err.Error())
 		c.JSON(200, gin.H{
 			"status": 5002,
 			"result": err.Error(),
 		})
 		return
 	}
+
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "AUTHORITY",
+		"创建权限配置成功: "+authorityDetailDTO.UserType+"-"+authorityDetailDTO.Model)
 	c.JSON(200, gin.H{
 		"status": 2000,
 	})
@@ -111,6 +127,11 @@ func UpdateAuthorityDetailById(c *gin.Context) {
 	// 参数绑定
 	var dto model.UpdateAuthorityDetailDTO
 	if err := c.ShouldBindJSON(&dto); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "AUTHORITY",
+			"编辑权限配置失败", err.Error())
 		log.Printf("[UpdateAuthorityDetailById] err = %v", err)
 		c.JSON(200, gin.H{
 			"status": 5001,
@@ -118,16 +139,30 @@ func UpdateAuthorityDetailById(c *gin.Context) {
 		})
 		return
 	}
+
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	// 查询原权限信息用于日志记录
+	var originalAuthority model.AuthorityDetail
+	resource.HrmsDB(c).Where("id = ?", dto.ID).First(&originalAuthority)
+
 	// 业务处理
 	err := service.UpdateAuthorityDetailById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateAuthorityDetailById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "AUTHORITY",
+			"编辑权限配置失败: "+originalAuthority.UserType+"-"+originalAuthority.Model, err.Error())
 		c.JSON(200, gin.H{
 			"status": 5002,
 			"result": err.Error(),
 		})
 		return
 	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "AUTHORITY",
+		"编辑权限配置成功: "+originalAuthority.UserType+"-"+originalAuthority.Model)
 	c.JSON(200, gin.H{
 		"status": 2000,
 	})
@@ -142,28 +177,34 @@ func UpdateAuthorityDetailById(c *gin.Context) {
 // @Router /api/authority/set_admin/{staff_id} [post]
 func SetAdminByStaffId(c *gin.Context) {
 	staffId := c.Param("staff_id")
+
+	// 获取操作用户信息
+	operatorId := getCurrentStaffId(c)
+	operatorName := getCurrentStaffName(c)
+
+	// 查询目标员工信息用于日志记录
+	var targetStaff model.Staff
+	resource.HrmsDB(c).Where("staff_id = ?", staffId).First(&targetStaff)
+
 	if staffId == "" {
 		log.Printf("[SetAdminByStaffId] staff_id is empty")
-		// c.JSON(200, gin.H{
-		// 	"status": 5001,
-		// 	"result": "staff_id is empty",
-		// })
+		LogOperationFailure(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+			"设置管理员失败", "员工ID为空")
 		sendFail(c, 5001, "设置管理员失败")
 		return
 	}
+
 	if err := service.SetAdminByStaffId(c, staffId); err != nil {
 		log.Printf("[SetAdminByStaffId] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5002,
-		// 	"result": err.Error(),
-		// })
+		LogOperationFailure(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+			"设置管理员失败: "+targetStaff.StaffName, err.Error())
 		sendFail(c, 5002, "设置管理员失败")
 		return
 	}
+
+	LogOperationSuccess(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+		"设置管理员成功: "+targetStaff.StaffName)
 	sendSuccess(c, nil, "设置管理员成功")
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 }
 
 // SetNormalByStaffId 设置普通用户
@@ -175,26 +216,32 @@ func SetAdminByStaffId(c *gin.Context) {
 // @Router /api/authority/set_normal/{staff_id} [post]
 func SetNormalByStaffId(c *gin.Context) {
 	staffId := c.Param("staff_id")
+
+	// 获取操作用户信息
+	operatorId := getCurrentStaffId(c)
+	operatorName := getCurrentStaffName(c)
+
+	// 查询目标员工信息用于日志记录
+	var targetStaff model.Staff
+	resource.HrmsDB(c).Where("staff_id = ?", staffId).First(&targetStaff)
+
 	if staffId == "" {
 		log.Printf("[SetNormalByStaffId] staff_id is empty")
-		// c.JSON(200, gin.H{
-		// 	"status": 5001,
-		// 	"result": "staff_id is empty",
-		// })
+		LogOperationFailure(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+			"设置普通用户失败", "员工ID为空")
 		sendFail(c, 5001, "设置普通用户失败")
 		return
 	}
+
 	if err := service.SetNormalByStaffId(c, staffId); err != nil {
 		log.Printf("[SetNormalByStaffId] err = %v", err)
-		// c.JSON(200, gin.H{
-		// 	"status": 5002,
-		// 	"result": err.Error(),
-		// })
+		LogOperationFailure(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+			"设置普通用户失败: "+targetStaff.StaffName, err.Error())
 		sendFail(c, 5002, "设置普通用户失败")
 		return
 	}
+
+	LogOperationSuccess(c, operatorId, operatorName, "UPDATE", "AUTHORITY",
+		"设置普通用户成功: "+targetStaff.StaffName)
 	sendSuccess(c, nil, "设置普通用户成功")
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 }

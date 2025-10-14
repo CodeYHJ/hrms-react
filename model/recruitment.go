@@ -27,13 +27,13 @@ type RecruitmentCreateDTO struct {
 }
 
 type RecruitmentEditDTO struct {
-	Id           int64  `binding:"required"`
-	JobName      string `gorm:"column:job_name" json:"job_name"`
-	JobType      string `gorm:"column:job_type" json:"job_type"`
-	BaseLocation string `gorm:"column:base_location" json:"base_location"`
-	BaseSalary   string `gorm:"column:base_salary" json:"base_salary"`
-	EduLevel     string `gorm:"column:edu_level" json:"edu_level"`
-	Experience   string `gorm:"column:experience" json:"experience"`
-	Describe     string `gorm:"column:describe" json:"describe"`
-	Email        string `gorm:"column:email" json:"email"`
+	RecruitmentId string `json:"recruitment_id" binding:"required"`
+	JobName       string `gorm:"column:job_name" json:"job_name"`
+	JobType       string `gorm:"column:job_type" json:"job_type"`
+	BaseLocation  string `gorm:"column:base_location" json:"base_location"`
+	BaseSalary    string `gorm:"column:base_salary" json:"base_salary"`
+	EduLevel      string `gorm:"column:edu_level" json:"edu_level"`
+	Experience    string `gorm:"column:experience" json:"experience"`
+	Describe      string `gorm:"column:describe" json:"describe"`
+	Email         string `gorm:"column:email" json:"email"`
 }

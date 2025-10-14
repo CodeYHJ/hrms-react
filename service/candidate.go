@@ -30,7 +30,7 @@ func DelCandidateByCandidateId(c *gin.Context, candidateId string) error {
 func UpdateCandidateById(c *gin.Context, dto *model.CandidateEditDTO) error {
 	var candidate model.Candidate
 	Transfer(&dto, &candidate)
-	if err := resource.HrmsDB(c).Model(&model.Candidate{}).Where("id = ?", candidate.ID).
+	if err := resource.HrmsDB(c).Model(&model.Candidate{}).Where("candidate_id = ?", dto.CandidateId).
 		Updates(&candidate).Error; err != nil {
 		log.Printf("UpdateCandidateById err = %v", err)
 		return err

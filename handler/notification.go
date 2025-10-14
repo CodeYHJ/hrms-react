@@ -2,6 +2,7 @@ package handler
 
 import (
 	"hrms/model"
+	"hrms/resource"
 	"hrms/service"
 	"log"
 
@@ -31,19 +32,33 @@ func init() {
 func CreateNotification(c *gin.Context) {
 	var notificationDTO model.NotificationDTO
 	if err := c.BindJSON(&notificationDTO); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "NOTIFICATION",
+			"创建通知失败", err.Error())
 		log.Printf("[CreateNotification] err = %v", err)
 		sendFail(c, 5001, "添加失败"+err.Error())
 		return
 	}
+
+	// 获取操作用户信息用于成功日志
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
 	// 业务处理
 	err := service.CreateNotification(c, &notificationDTO)
 	if err != nil {
 		log.Printf("[CreateNotification] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "NOTIFICATION",
+			"创建通知失败: "+notificationDTO.NoticeTitle, err.Error())
 		sendFail(c, 5002, "添加失败"+err.Error())
 		return
 	}
-	sendSuccess(c, nil, "添加成功")
 
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "NOTIFICATION",
+		"创建通知成功: "+notificationDTO.NoticeTitle)
+	sendSuccess(c, nil, "添加成功")
 }
 
 // 删除通知
@@ -56,10 +71,21 @@ func CreateNotification(c *gin.Context) {
 // @Router /api/notification/delete/{notice_id} [delete]
 func DeleteNotificationById(c *gin.Context) {
 	noticeId := c.Param("notice_id")
+
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	// 查询要删除的通知信息用于日志记录
+	var notification model.Notification
+	resource.HrmsDB(c).Where("notice_id = ?", noticeId).First(&notification)
+
 	// 业务处理
 	err := service.DelNotificationById(c, noticeId)
 	if err != nil {
 		log.Printf("[DeleteNotificationById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "DELETE", "NOTIFICATION",
+			"删除通知失败: "+notification.NoticeTitle, err.Error())
 		// c.JSON(200, gin.H{
 		// 	"status": 5002,
 		// 	"result": err.Error(),
@@ -67,6 +93,9 @@ func DeleteNotificationById(c *gin.Context) {
 		sendFail(c, 5002, "删除失败"+err.Error())
 		return
 	}
+
+	LogOperationSuccess(c, staffId, staffName, "DELETE", "NOTIFICATION",
+		"删除通知成功: "+notification.NoticeTitle)
 	sendSuccess(c, nil, "删除成功")
 	// c.JSON(200, gin.H{
 	// 	"status": 2000,
@@ -128,17 +157,35 @@ func GetPublishedNotifications(c *gin.Context) {
 func UpdateNotificationById(c *gin.Context) {
 	var dto model.NotificationEditDTO
 	if err := c.BindJSON(&dto); err != nil {
+		// 获取操作用户信息用于失败日志
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "NOTIFICATION",
+			"编辑通知失败", err.Error())
 		log.Printf("[UpdateNotificationById] err = %v", err)
 		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
+
+	// 获取操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	// 查询原通知信息用于日志记录
+	var originalNotification model.Notification
+	resource.HrmsDB(c).Where("id = ?", dto.ID).First(&originalNotification)
+
 	// 业务处理
 	err := service.UpdateNotificationById(c, &dto)
 	if err != nil {
 		log.Printf("[UpdateNotificationById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "NOTIFICATION",
+			"编辑通知失败: "+originalNotification.NoticeTitle, err.Error())
 		sendFail(c, 5002, "编辑失败"+err.Error())
 		return
 	}
-	sendSuccess(c, nil, "编辑成功")
 
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "NOTIFICATION",
+		"编辑通知成功: "+originalNotification.NoticeTitle)
+	sendSuccess(c, nil, "编辑成功")
 }

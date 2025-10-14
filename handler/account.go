@@ -8,6 +8,7 @@ import (
 	"hrms/service"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -155,23 +156,24 @@ func Login(c *gin.Context) {
 		loginR.UserNo, service.MD5(loginR.UserPassword)).First(&loginDb)
 	if loginDb.StaffId != loginR.UserNo {
 		log.Printf("[handler.Login] user login fail, user = %v", loginR)
-		// c.JSON(200, gin.H{
-		// 	"status": 2001,
-		// 	"result": "check fail",
-		// })
+		// 记录登录失败日志
+		LogOperationFailure(c, 0, loginR.UserNo, "LOGIN", "AUTH", 
+			"用户登录失败: "+loginR.UserNo, "用户名或密码错误")
 		sendFail(c, 2001, "check fail")
 		return
 	}
 	hrmsDB.Where("staff_id = ?", loginDb.StaffId).Find(&staff)
 
 	log.Printf("[handler.Login] user login success, user = %v", loginR)
+	// 记录登录成功日志
+	staffId, _ := strconv.ParseUint(staff.StaffId, 10, 64)
+	LogOperationSuccess(c, staffId, staff.StaffName, "LOGIN", "AUTH", 
+		"用户登录成功: "+staff.StaffName)
+	
 	// set cookie user_cookie=角色_工号_分公司ID_员工姓名(base64编码)
 	c.SetCookie("user_cookie", fmt.Sprintf("%v_%v_%v_%v", loginDb.UserType, loginDb.StaffId, loginR.BranchId,
 		base64.StdEncoding.EncodeToString([]byte(staff.StaffName))), 0, "/", "*", false, false)
 
-	// c.JSON(200, gin.H{
-	// 	"status": 2000,
-	// })
 	sendSuccess(c, 2000, "登录成功")
 }
 

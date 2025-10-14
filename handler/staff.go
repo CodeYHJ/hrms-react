@@ -48,12 +48,20 @@ func StaffCreate(c *gin.Context) {
 		return
 	}
 	log.Printf("[StaffCreate staff = %v]", staffCreateDto)
+	
+	// 获取当前操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
 	// 创建员工信息落表
 	if staff, err := buildStaffInfoSaveDB(c, staffCreateDto); err != nil {
 		log.Printf("[StaffCreate err = %v]", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "STAFF", 
+			"创建员工: "+staffCreateDto.StaffName, err.Error())
 		sendFail(c, 5001, "添加失败"+err.Error())
-
 	} else {
+		LogOperationSuccess(c, staffId, staffName, "CREATE", "STAFF", 
+			"创建员工: "+staffCreateDto.StaffName)
 		sendSuccess(c, staff, "添加员工信息成功")
 	}
 }
@@ -121,14 +129,15 @@ func StaffEdit(c *gin.Context) {
 	var staffEditDTO model.StaffEditDTO
 	if err := c.BindJSON(&staffEditDTO); err != nil {
 		log.Printf("[StaffEdit] err = %v", err)
-		// c.JSON(http.StatusInternalServerError, gin.H{
-		// 	"status":  false,
-		// 	"message": err, "data": nil, "code": 5001,
-		// })
 		sendFail(c, 5001, "编辑失败"+err.Error())
 		return
 	}
 	log.Printf("[StaffEdit staff = %v]", staffEditDTO)
+	
+	// 获取当前操作用户信息
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+	
 	staff := model.Staff{
 		StaffId:       staffEditDTO.StaffId,
 		StaffName:     staffEditDTO.StaffName,
@@ -152,14 +161,18 @@ func StaffEdit(c *gin.Context) {
 	var leader model.Staff
 	resource.HrmsDB(c).Where("staff_id = ?", staffEditDTO.LeaderStaffId).Find(&leader)
 	staff.LeaderName = leader.StaffName
-	resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", staffEditDTO.StaffId).
-		Updates(&staff)
+	
+	result := resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_id = ?", staffEditDTO.StaffId).Updates(&staff)
+	if result.Error != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "STAFF", 
+			"编辑员工: "+staffEditDTO.StaffName, result.Error.Error())
+		sendFail(c, 5001, "编辑失败"+result.Error.Error())
+		return
+	}
+	
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "STAFF", 
+		"编辑员工: "+staffEditDTO.StaffName)
 	sendSuccess(c, staff, "编辑成功")
-	// c.JSON(200, gin.H{
-	// 	"status": true,
-	// 	"code":   2000,
-	// 	"data":   nil,
-	// })
 }
 
 // 根据员工ID查询员工信息
@@ -321,27 +334,34 @@ func StaffQueryByDep(c *gin.Context) {
 // @Router /api/staff/del/{staff_id} [delete]
 func StaffDel(c *gin.Context) {
 	staffId := c.Param("staff_id")
+	
+	// 获取当前操作用户信息
+	operatorId := getCurrentStaffId(c)
+	operatorName := getCurrentStaffName(c)
+	
+	// 查询要删除的员工信息用于日志记录
+	var staff model.Staff
+	resource.HrmsDB(c).Where("staff_id = ?", staffId).First(&staff)
+	
 	if err := resource.HrmsDB(c).Where("staff_id = ?", staffId).Delete(&model.Staff{}).Error; err != nil {
 		log.Printf("[StaffDel] err = %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":  false,
-			"message": err, "data": nil, "code": 5001,
-		})
+		LogOperationFailure(c, operatorId, operatorName, "DELETE", "STAFF", 
+			"删除员工: "+staff.StaffName, err.Error())
 		sendFail(c, 5001, "删除失败"+err.Error())
 		return
 	}
 	// 密码删除
 	if err := resource.HrmsDB(c).Where("staff_id = ?", staffId).Delete(&model.Authority{}).Error; err != nil {
 		log.Printf("[StaffDel] err = %v", err)
-		// c.JSON(http.StatusInternalServerError, gin.H{
-		// 	"status":  false,
-		// 	"message": err, "data": nil, "code": 5001,
-		// })
+		LogOperationFailure(c, operatorId, operatorName, "DELETE", "STAFF", 
+			"删除员工权限: "+staff.StaffName, err.Error())
 		sendFail(c, 5001, "删除失败"+err.Error())
 		return
 	}
+	
+	LogOperationSuccess(c, operatorId, operatorName, "DELETE", "STAFF", 
+		"删除员工: "+staff.StaffName)
 	sendSuccess(c, nil, "删除成功")
-
 }
 
 // 根据员工ID查询员工信息

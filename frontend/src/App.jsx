@@ -29,10 +29,12 @@ import ExamHistory from "./pages/Exam/ExamHistory";
 import NotificationManagement from "./pages/Notification/NotificationManagement";
 import AuthorityManagement from "./pages/Authority/AuthorityManagement";
 import RolePermissionManagement from "./pages/Authority/RolePermissionManagement";
+import OperationLogManagement from "./pages/OperationLog/OperationLogManagement";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import NotFound from "./components/Layout/NotFound";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import { AuthProvider } from "./components/Auth/AuthContext";
+import CandidateInterview from "./pages/Candidate/CandidateInterview";
 
 // 配置全局message
 message.config({
@@ -51,14 +53,26 @@ function App() {
             <Route path="/" element={<ProtectedRoute />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="staff" element={<Navigate to="/staff/info" replace />} />
+              <Route
+                path="staff"
+                element={<Navigate to="/staff/info" replace />}
+              />
               <Route path="staff/info" element={<StaffManagement />} />
               <Route path="staff/password" element={<PasswordManagement />} />
               <Route path="department" element={<DepartmentManagement />} />
               <Route path="rank" element={<RankManagement />} />
-              <Route path="attendance/record" element={<AttendanceManagement />} />
-              <Route path="attendance/history" element={<AttendanceHistory />} />
-              <Route path="attendance/approve" element={<AttendanceApproval />} />
+              <Route
+                path="attendance/record"
+                element={<AttendanceManagement />}
+              />
+              <Route
+                path="attendance/history"
+                element={<AttendanceHistory />}
+              />
+              <Route
+                path="attendance/approve"
+                element={<AttendanceApproval />}
+              />
               <Route path="salary/giving" element={<SalaryGiving />} />
               <Route path="salary/detail" element={<SalaryDetail />} />
               <Route path="salary/history" element={<SalaryHistory />} />
@@ -68,13 +82,30 @@ function App() {
               <Route path="recruitment/manage" element={<RecruitmentInfo />} />
               <Route path="recruitment/add" element={<RecruitmentForm />} />
               <Route path="recruitment/edit" element={<RecruitmentForm />} />
-              <Route path="recruitment/detail" element={<RecruitmentDetail />} />
-              <Route path="candidate/manage" element={<CandidateManagement />} />
+              <Route
+                path="recruitment/detail"
+                element={<RecruitmentDetail />}
+              />
+              <Route
+                path="candidate/manage"
+                element={<CandidateManagement />}
+              />
               <Route path="candidate/add" element={<CandidateForm />} />
               <Route path="candidate/edit" element={<CandidateForm />} />
               <Route path="candidate/detail" element={<CandidateDetail />} />
+              <Route
+                path="candidate/interview"
+                element={<CandidateInterview />}
+              />
               <Route path="authority/admin" element={<AuthorityManagement />} />
-              <Route path="authority/role" element={<RolePermissionManagement />} />
+              <Route
+                path="authority/role"
+                element={<RolePermissionManagement />}
+              />
+              <Route
+                path="operation-log"
+                element={<OperationLogManagement />}
+              />
               <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />

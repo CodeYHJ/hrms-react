@@ -30,7 +30,7 @@ func DelRecruitmentByRecruitmentId(c *gin.Context, recruitmentId string) error {
 func UpdateRecruitmentById(c *gin.Context, dto *model.RecruitmentEditDTO) error {
 	var recruitment model.Recruitment
 	Transfer(&dto, &recruitment)
-	if err := resource.HrmsDB(c).Model(&model.Recruitment{}).Where("id = ?", recruitment.ID).
+	if err := resource.HrmsDB(c).Model(&model.Recruitment{}).Where("recruitment_id = ?", dto.RecruitmentId).
 		Updates(&recruitment).Error; err != nil {
 		log.Printf("UpdateRecruitmentById err = %v", err)
 		return err

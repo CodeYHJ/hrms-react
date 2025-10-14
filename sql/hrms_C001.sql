@@ -254,6 +254,31 @@ CREATE TABLE `staff` (
 
 INSERT INTO `staff` VALUES (1,'root','超级管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',NULL,NULL,NULL),(2,'admin','系统管理员',NULL,NULL,'1999-05-21','-1',1,'-1','-1','-1','-1',-1,'-1','-1','-1','-1',-1,'2021-01-02',NULL,NULL,NULL),(11,'H14774','彭博荣','H22024','王明','1999-05-21','433334199905215517',1,'汉族','清华大学','机械设计制造及其自动化','本科',5996,'611116161115151515','rank_32826814','dep_1322682358','gdutarong2@161.com',15521306934,'2021-02-24','2021-03-13 14:40:56','2021-04-15 11:00:16',NULL),(17,'H14466','李丽',NULL,NULL,'1999-05-21','433334199905215500',2,'汉族','清华大学','网络工程','博士',5000,'611116161115151515','rank_1110616701','dep_1460851561','gdutarong@163.com',18823042440,'2021-02-24','2021-03-23 10:12:30','2021-04-10 19:05:32',NULL),(18,'H22024','王明','H14466','李丽','1999-05-21','433333199905215517',1,'汉族','清华大学','计算机','本科及以上',4500,'611116161115151515','rank_3404026447','dep_2547022224','gdutarong@163.com',19927454324,'2021-01-02','2021-03-28 18:11:35','2021-04-15 11:03:10',NULL),(26,'H27826','李华','H14774','彭博荣','1997-02-27','433334199905215333',1,'汉族','清华大学','机械自动化','博士',19900,'611116161115151515','rank_3404026447','dep_2547022224','1378789620@qq.com',15521306932,'2021-04-17','2021-04-17 16:55:04','2021-05-27 13:03:12',NULL);
 
+-- 创建操作日志表
+CREATE TABLE operation_log (
+    log_id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '日志ID',
+    staff_id BIGINT NOT NULL COMMENT '操作人员ID',
+    staff_name VARCHAR(50) NOT NULL COMMENT '操作人员姓名',
+    operation_type VARCHAR(20) NOT NULL COMMENT '操作类型：CREATE-创建,UPDATE-更新,DELETE-删除,QUERY-查询,LOGIN-登录,LOGOUT-登出,EXPORT-导出,IMPORT-导入',
+    operation_module VARCHAR(50) NOT NULL COMMENT '操作模块：STAFF-员工管理,DEPARTMENT-部门管理,ATTENDANCE-考勤管理,SALARY-薪资管理,RECRUITMENT-招聘管理,CANDIDATE-应聘者管理,EXAM-考试管理,RANK-职级管理,AUTHORITY-权限管理,NOTIFICATION-通知管理',
+    operation_desc VARCHAR(500) NOT NULL COMMENT '操作描述',
+    request_method VARCHAR(10) COMMENT '请求方法：GET,POST,PUT,DELETE',
+    request_url VARCHAR(200) COMMENT '请求URL',
+    request_params TEXT COMMENT '请求参数',
+    response_result TEXT COMMENT '响应结果',
+    ip_address VARCHAR(45) COMMENT 'IP地址',
+    user_agent VARCHAR(500) COMMENT '用户代理',
+    operation_status TINYINT DEFAULT 1 COMMENT '操作状态：1-成功,0-失败',
+    error_message TEXT COMMENT '错误信息',
+    operation_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX idx_staff_id (staff_id),
+    INDEX idx_operation_type (operation_type),
+    INDEX idx_operation_module (operation_module),
+    INDEX idx_operation_time (operation_time),
+    INDEX idx_operation_status (operation_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志表';
 
 
 
