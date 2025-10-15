@@ -171,6 +171,9 @@ func UpdateSalaryById(c *gin.Context) {
 func GetSalaryByStaffId(c *gin.Context) {
 	// 参数绑定
 	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"  // 处理 /query/all 路由
+	}
 	start, limit := service.AcceptPage(c)
 	// 业务处理
 	list, total, err := service.GetSalaryByStaffId(c, staffId, start, limit)
@@ -352,6 +355,9 @@ func PaySalaryRecordById(c *gin.Context) {
 func GetHadPaySalaryRecordByStaffId(c *gin.Context) {
 	// 参数绑定
 	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"  // 处理 /query_history/all 路由
+	}
 	start, limit := service.AcceptPage(c)
 	// 业务处理
 	list, total, err := service.GetHadPaySalaryRecordByStaffId(c, staffId, start, limit)
