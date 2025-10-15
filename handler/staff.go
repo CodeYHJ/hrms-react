@@ -21,8 +21,9 @@ import (
 
 type StaffListVO struct {
 	model.Staff
-	RankName string `json:"rank_name"`
-	DepName  string `json:"dep_name"`
+	RankName     string `json:"rank_name"`
+	DepName      string `json:"dep_name"`
+	UserTypeName string `json:"user_type_name"`
 }
 
 func init() {
@@ -675,7 +676,8 @@ func StaffList(c *gin.Context) {
 	query := resource.HrmsDB(c).Model(&model.Staff{}).Where("staff_name LIKE ?", "%"+search+"%")
 	query.Joins("LEFT JOIN `rank` ON staff.rank_id = `rank`.rank_id").
 		Joins("LEFT JOIN `department` ON staff.dep_id = `department`.dep_id").
-		Select("staff.*, `rank`.rank_name as rank_name, `department`.dep_name as dep_name")
+		Joins("LEFT JOIN authority ON staff.staff_id = authority.staff_id").
+		Select("staff.*, `rank`.rank_name as rank_name, `department`.dep_name as dep_name, authority.user_type as user_type_name")
 	query.Count(&total)
 	query.Limit(size).Offset((page - 1) * size).Find(&vos)
 

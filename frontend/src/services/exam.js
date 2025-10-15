@@ -14,7 +14,7 @@ export const examService = {
   editExam: (values) => api.post('/example/edit', values),
   
   // 删除考试
-  deleteExam: (examId) => api.delete(`/example/del/${examId}`),
+  deleteExam: (examId) => api.delete(`/example/delete/${examId}`),
   
   // 获取考试历史
   getExamHistory: (name = '') => {

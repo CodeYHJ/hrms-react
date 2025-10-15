@@ -87,6 +87,9 @@ func routerInit(server *gin.Engine) {
 }
 
 func htmlInit(server *gin.Engine) {
+	// 加载HTML模板
+	server.LoadHTMLGlob("resource/templates/*.html")
+
 	// React应用静态资源服务（JS、CSS、图片等）
 	server.Static("/app/assets", "./dist/assets")
 

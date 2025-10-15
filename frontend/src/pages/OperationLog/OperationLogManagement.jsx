@@ -48,6 +48,9 @@ const OperationLogManagement = () => {
     total: 0,
   });
 
+  // 表格高度状态
+  const [tableHeight, setTableHeight] = useState(400);
+
   // 详情相关状态
   const [detailVisible, setDetailVisible] = useState(false);
   const [detailData, setDetailData] = useState(null);
@@ -87,72 +90,126 @@ const OperationLogManagement = () => {
     fetchStats();
   }, []);
 
+  // 计算表格高度的函数
+  const calculateTableHeight = () => {
+    // 获取ant-layout-content容器高度
+    const contentElement = document.querySelector(".ant-layout-content");
+    const containerHeight = contentElement
+      ? contentElement.clientHeight
+      : window.innerHeight;
+
+    // ant-layout-content有24px margin和24px padding，总共48px
+    const contentPadding = 48;
+
+    // 统计卡片高度: 120px
+    // 搜索表单高度: 80px
+    // 表格标题和边距: 100px (增加Card内边距和表格空白)
+    // 分页组件高度: 80px (增加分页组件占位)
+    // 底部预留空间: 100px
+    // 额外预留空间: 80px (Table组件内边距、行间距、滚动条等)
+    const reservedHeight = contentPadding + 120 + 80 + 100 + 80 + 100 + 80 + 20;
+    const calculatedHeight = containerHeight - reservedHeight;
+    // 设置最小高度300px，最大高度800px
+    const finalHeight = Math.max(250, Math.min(calculatedHeight, 800));
+    setTableHeight(finalHeight);
+  };
   // 获取操作日志列表
   const fetchLogList = async (params = {}) => {
-    try {
-      setLoading(true);
-      const searchParams = form.getFieldsValue();
-      
-      // 处理时间范围
-      if (searchParams.operationTime && searchParams.operationTime.length === 2) {
-        searchParams.start_time = searchParams.operationTime[0].format("YYYY-MM-DD HH:mm:ss");
-        searchParams.end_time = searchParams.operationTime[1].format("YYYY-MM-DD HH:mm:ss");
-      }
-      delete searchParams.operationTime;
+    setLoading(true);
+    const searchParams = form.getFieldsValue();
 
-      const response = await operationLogService.getLogs({
-        ...searchParams,
-        ...params,
-        page: params.page || pagination.current,
-        page_size: params.page_size || pagination.pageSize,
-      });
-
-      if (response && response.logs) {
-        setLogList(response.logs || []);
-        setPagination(prev => ({
-          ...prev,
-          total: response.total || 0,
-          current: params.page || prev.current,
-          pageSize: params.page_size || prev.pageSize,
-        }));
-      }
-    } catch (error) {
-      message.error("获取操作日志列表失败: " + error.message);
-    } finally {
-      setLoading(false);
+    // 处理时间范围
+    if (searchParams.operationTime && searchParams.operationTime.length === 2) {
+      searchParams.start_time = searchParams.operationTime[0].format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
+      searchParams.end_time = searchParams.operationTime[1].format(
+        "YYYY-MM-DD HH:mm:ss"
+      );
     }
+    delete searchParams.operationTime;
+
+    // 合并搜索参数和表格过滤器参数
+    // 表格过滤器参数优先级高于搜索表单参数
+    const finalParams = {
+      ...searchParams,
+      ...params,
+    };
+
+    const response = await operationLogService.getLogs({
+      ...finalParams,
+      page: params.page || pagination.current,
+      page_size: params.page_size || pagination.pageSize,
+    });
+
+    if (response && response.logs) {
+      setLogList(response.logs || []);
+      setPagination((prev) => ({
+        ...prev,
+        total: response.total || 0,
+        current: params.page || prev.current,
+        pageSize: params.page_size || prev.pageSize,
+      }));
+    }
+    setLoading(false);
   };
+
+  // 监听窗口大小变化
+  useEffect(() => {
+    calculateTableHeight();
+
+    const handleResize = () => {
+      calculateTableHeight();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // 清理事件监听器
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [logList]);
 
   // 获取统计数据
   const fetchStats = async () => {
-    try {
-      const response = await operationLogService.getStats();
-      if (response) {
-        setStats(response);
-      }
-    } catch (error) {
-      console.error("获取统计数据失败:", error);
+    const response = await operationLogService.getStats();
+    if (response) {
+      setStats(response);
     }
   };
 
   // 搜索
   const handleSearch = () => {
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchLogList({ page: 1 });
   };
 
   // 重置搜索条件
   const handleReset = () => {
     form.resetFields();
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchLogList({ page: 1 });
   };
 
   // 分页变化
-  const handleTableChange = (newPagination) => {
+  const handleTableChange = (newPagination, filters) => {
+    const filterParams = {};
+    
+    // 处理表格过滤器
+    if (filters.operation_type && filters.operation_type.length > 0) {
+      filterParams.operation_type = filters.operation_type[0];
+    }
+    if (filters.operation_module && filters.operation_module.length > 0) {
+      filterParams.operation_module = filters.operation_module[0];
+    }
+    if (filters.operation_status && filters.operation_status.length > 0) {
+      filterParams.operation_status = filters.operation_status[0];
+    }
+    
     fetchLogList({
       page: newPagination.current,
       page_size: newPagination.pageSize,
+      ...filterParams,
     });
   };
 
@@ -164,14 +221,10 @@ const OperationLogManagement = () => {
 
   // 删除日志
   const handleDelete = async (logId) => {
-    try {
-      await operationLogService.deleteLog(logId);
-      message.success("删除成功");
-      fetchLogList();
-      fetchStats();
-    } catch (error) {
-      message.error("删除失败: " + error.message);
-    }
+    await operationLogService.deleteLog(logId);
+    message.success("删除成功");
+    fetchLogList();
+    fetchStats();
   };
 
   // 批量删除
@@ -180,15 +233,13 @@ const OperationLogManagement = () => {
       title: "批量删除确认",
       content: "确定要删除30天前的操作日志吗？此操作不可恢复。",
       onOk: async () => {
-        try {
-          const endTime = dayjs().subtract(30, "days").format("YYYY-MM-DD HH:mm:ss");
-          await operationLogService.deleteLogsByTime(endTime);
-          message.success("批量删除成功");
-          fetchLogList();
-          fetchStats();
-        } catch (error) {
-          message.error("批量删除失败: " + error.message);
-        }
+        const endTime = dayjs()
+          .subtract(30, "days")
+          .format("YYYY-MM-DD HH:mm:ss");
+        await operationLogService.deleteLogsByTime(endTime);
+        message.success("批量删除成功");
+        fetchLogList();
+        fetchStats();
       },
     });
   };
@@ -214,6 +265,11 @@ const OperationLogManagement = () => {
       dataIndex: "operation_type",
       key: "operation_type",
       width: 100,
+      filters: operationTypes.map(type => ({
+        text: type.label,
+        value: type.value,
+      })),
+      filterMultiple: false,
       render: (type) => {
         const typeMap = {
           CREATE: { color: "green", text: "创建" },
@@ -235,6 +291,11 @@ const OperationLogManagement = () => {
       dataIndex: "operation_module",
       key: "operation_module",
       width: 120,
+      filters: operationModules.map(module => ({
+        text: module.label,
+        value: module.value,
+      })),
+      filterMultiple: false,
       render: (module) => {
         const moduleMap = {
           STAFF: "员工管理",
@@ -265,6 +326,11 @@ const OperationLogManagement = () => {
       dataIndex: "operation_status",
       key: "operation_status",
       width: 100,
+      filters: [
+        { text: "成功", value: 1 },
+        { text: "失败", value: 0 },
+      ],
+      filterMultiple: false,
       render: (status) => (
         <Tag color={status === 1 ? "success" : "error"}>
           {status === 1 ? "成功" : "失败"}
@@ -309,12 +375,7 @@ const OperationLogManagement = () => {
               okText="确定"
               cancelText="取消"
             >
-              <Button
-                type="link"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-              >
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>
                 删除
               </Button>
             </Popconfirm>
@@ -359,7 +420,14 @@ const OperationLogManagement = () => {
           <Card>
             <Statistic
               title="成功率"
-              value={stats.total_logs ? ((stats.success_logs || 0) / stats.total_logs * 100).toFixed(2) : 0}
+              value={
+                stats.total_logs
+                  ? (
+                      ((stats.success_logs || 0) / stats.total_logs) *
+                      100
+                    ).toFixed(2)
+                  : 0
+              }
               suffix="%"
               valueStyle={{ color: "#1890ff" }}
             />
@@ -371,57 +439,19 @@ const OperationLogManagement = () => {
       <Card style={{ marginBottom: 16 }}>
         <Form form={form} layout="inline">
           <Form.Item name="staff_name" label="操作人员">
-            <Input placeholder="请输入操作人员姓名" allowClear />
-          </Form.Item>
-          <Form.Item name="operation_type" label="操作类型">
-            <Select placeholder="请选择操作类型" allowClear style={{ width: 120 }}>
-              {operationTypes.map(type => (
-                <Option key={type.value} value={type.value}>{type.label}</Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="operation_module" label="操作模块">
-            <Select placeholder="请选择操作模块" allowClear style={{ width: 140 }}>
-              {operationModules.map(module => (
-                <Option key={module.value} value={module.value}>{module.label}</Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="operation_status" label="操作状态">
-            <Select placeholder="请选择操作状态" allowClear style={{ width: 120 }}>
-              <Option value={1}>成功</Option>
-              <Option value={0}>失败</Option>
-            </Select>
+            <Input.Search 
+              placeholder="请输入操作人员姓名" 
+              allowClear 
+              onSearch={handleSearch}
+            />
           </Form.Item>
           <Form.Item name="operation_time" label="操作时间">
             <RangePicker
               showTime
               format="YYYY-MM-DD HH:mm:ss"
               placeholder={["开始时间", "结束时间"]}
+              onChange={handleSearch}
             />
-          </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button
-                type="primary"
-                icon={<SearchOutlined />}
-                loading={searchLoading}
-                onClick={handleSearch}
-              >
-                搜索
-              </Button>
-              <Button icon={<ClearOutlined />} onClick={handleReset}>
-                重置
-              </Button>
-              <Button icon={<ReloadOutlined />} onClick={() => fetchLogList()}>
-                刷新
-              </Button>
-              {hasPermission("operation_log_delete") && (
-                <Button danger onClick={handleBatchDelete}>
-                  批量删除
-                </Button>
-              )}
-            </Space>
           </Form.Item>
         </Form>
       </Card>
@@ -442,7 +472,7 @@ const OperationLogManagement = () => {
               `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
           }}
           onChange={handleTableChange}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1200, y: tableHeight }}
           size="middle"
         />
       </Card>
@@ -463,34 +493,85 @@ const OperationLogManagement = () => {
           <div>
             <Row gutter={16}>
               <Col span={12}>
-                <p><strong>日志ID：</strong>{detailData.log_id}</p>
-                <p><strong>操作人员：</strong>{detailData.staff_name}</p>
-                <p><strong>操作类型：</strong>{detailData.operation_type}</p>
-                <p><strong>操作模块：</strong>{detailData.operation_module}</p>
-                <p><strong>操作状态：</strong>
-                  <Tag color={detailData.operation_status === 1 ? "success" : "error"}>
+                <p>
+                  <strong>日志ID：</strong>
+                  {detailData.log_id}
+                </p>
+                <p>
+                  <strong>操作人员：</strong>
+                  {detailData.staff_name}
+                </p>
+                <p>
+                  <strong>操作类型：</strong>
+                  {detailData.operation_type}
+                </p>
+                <p>
+                  <strong>操作模块：</strong>
+                  {detailData.operation_module}
+                </p>
+                <p>
+                  <strong>操作状态：</strong>
+                  <Tag
+                    color={
+                      detailData.operation_status === 1 ? "success" : "error"
+                    }
+                  >
                     {detailData.operation_status === 1 ? "成功" : "失败"}
                   </Tag>
                 </p>
               </Col>
               <Col span={12}>
-                <p><strong>IP地址：</strong>{detailData.ip_address}</p>
-                <p><strong>请求方法：</strong>{detailData.request_method}</p>
-                <p><strong>请求URL：</strong>{detailData.request_url}</p>
-                <p><strong>操作时间：</strong>{formatDate(detailData.operation_time)}</p>
+                <p>
+                  <strong>IP地址：</strong>
+                  {detailData.ip_address}
+                </p>
+                <p>
+                  <strong>请求方法：</strong>
+                  {detailData.request_method}
+                </p>
+                <p>
+                  <strong>请求URL：</strong>
+                  {detailData.request_url}
+                </p>
+                <p>
+                  <strong>操作时间：</strong>
+                  {formatDate(detailData.operation_time)}
+                </p>
               </Col>
             </Row>
             <Row>
               <Col span={24}>
-                <p><strong>操作描述：</strong>{detailData.operation_desc}</p>
-                <p><strong>请求参数：</strong>
-                  <pre style={{ background: "#f5f5f5", padding: "8px", borderRadius: "4px", maxHeight: "200px", overflow: "auto" }}>
+                <p>
+                  <strong>操作描述：</strong>
+                  {detailData.operation_desc}
+                </p>
+                <p>
+                  <strong>请求参数：</strong>
+                  <pre
+                    style={{
+                      background: "#f5f5f5",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      maxHeight: "200px",
+                      overflow: "auto",
+                    }}
+                  >
                     {detailData.request_params || "无"}
                   </pre>
                 </p>
                 {detailData.error_message && (
-                  <p><strong>错误信息：</strong>
-                    <pre style={{ background: "#fff2f0", padding: "8px", borderRadius: "4px", color: "#ff4d4f", maxHeight: "200px", overflow: "auto" }}>
+                  <p>
+                    <strong>错误信息：</strong>
+                    <pre
+                      style={{
+                        background: "#fff2f0",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        color: "#ff4d4f",
+                        maxHeight: "200px",
+                        overflow: "auto",
+                      }}
+                    >
                       {detailData.error_message}
                     </pre>
                   </p>

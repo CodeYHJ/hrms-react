@@ -49,10 +49,10 @@ const AuthorityManagement = () => {
     const response = await staffService.getAllStaff();
 
     if (response.status) {
-      setStaffList(response.data || []);
+      setStaffList(response.data.data || []);
       setPagination((prev) => ({
         ...prev,
-        total: response.data?.length || 0,
+        total: response.data?.total,
       }));
     } else {
       message.error(response.message || "获取员工列表失败");
@@ -107,11 +107,11 @@ const AuthorityManagement = () => {
   // 获取用户类型标签
   const getUserTypeTag = (userType) => {
     switch (userType) {
-      case "超级管理员":
+      case "super":
         return <Tag color="red">超级管理员</Tag>;
-      case "系统管理员":
+      case "sys":
         return <Tag color="orange">系统管理员</Tag>;
-      case "普通员工":
+      case "normal":
         return <Tag color="blue">普通员工</Tag>;
       default:
         return <Tag color="default">未知</Tag>;
@@ -197,7 +197,6 @@ const AuthorityManagement = () => {
   useEffect(() => {
     fetchStaffList();
   }, []);
-
   return (
     <div className="authority-management">
       <Card title="管理员管理" style={{ marginBottom: 16 }}>

@@ -3,7 +3,7 @@ import api from './api'
 export const staffService = {
     // 获取所有员工列表
     getAllStaff: async (params = {}) => {
-        const response = await api.get('/staff/query/all', { params })
+        const response = await api.get('/staff/list', { params })
         return response
 
     },

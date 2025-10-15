@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考试进行中</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .question { margin-bottom: 20px; }
+        .options { margin-left: 20px; }
+        button { padding: 10px 20px; background: #1890ff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #40a9ff; }
+    </style>
+</head>
+<body>
+    <h1>{{.example.Name}}</h1>
+    <p>{{.example.Describe}}</p>
+    <p>考试时间: {{.example.Date}} | 限制时间: {{.example.Limit}}分钟</p>
+
+    <form id="examForm">
+        {{range .items}}
+        <div class="question">
+            <h3>{{.Num}}. {{.Title}}</h3>
+            <div class="options">
+                {{range $index, $option := .Items}}
+                <label>
+                    <input type="radio" name="q{{$.Num}}" value="{{$option}}" required>
+                    {{$option}}
+                </label><br>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+        <button type="submit">提交考试</button>
+    </form>
+
+    <script>
+        document.getElementById('examForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const answers = {};
+            for (let [key, value] of formData.entries()) {
+                answers[key] = value;
+            }
+            const commit = JSON.stringify(answers);
+
+            // 获取staff_id，从cookie或假设
+            const cookie = document.cookie.split(';').find(c => c.trim().startsWith('user_cookie='));
+            const staffId = cookie ? cookie.split('_')[1] : 'unknown'; // 假设cookie格式
+
+            const data = {
+                example_id: '{{.example.ExampleId}}',
+                staff_id: staffId,
+                staff_name: '考生', // 需要从cookie或API获取
+                name: '{{.example.Name}}',
+                date: new Date().toISOString().split('T')[0],
+                content: '{{.example.Content}}',
+                commit: commit
+            };
+
+            fetch('/api/example_score/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 2000) {
+                    alert('提交成功！得分: ' + result.total);
+                    window.close();
+                } else {
+                    alert('提交失败: ' + result.result);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('提交失败');
+            });
+        });
+    </script>
+</body>
+</html>

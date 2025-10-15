@@ -172,7 +172,18 @@ func OnboardStaff(c *gin.Context, dto *model.StaffOnboardDTO, operatorId string)
 		log.Printf("OnboardStaff err = %v", err)
 		return err
 	}
-	
+
+	// 创建默认普通员工权限
+	authorityRecord := model.Authority{
+		AuthorityId: RandomID("A"),
+		StaffId:     staffRecord.StaffId,
+		UserType:    "normal",
+	}
+	if err := resource.HrmsDB(c).Create(&authorityRecord).Error; err != nil {
+		log.Printf("OnboardStaff create authority err = %v", err)
+		return err
+	}
+
 	// 记录生命周期日志
 	logRecord := model.StaffLifecycleLog{
 		StaffId:    staffRecord.StaffId,
