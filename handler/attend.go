@@ -145,6 +145,9 @@ func GetAttendRecordByStaffId(c *gin.Context) {
 func GetAttendRecordHistoryByStaffId(c *gin.Context) {
 	// 参数绑定
 	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"  // 处理 /query_history/all 路由
+	}
 	start, limit := service.AcceptPage(c)
 	// 业务处理
 	list, total, err := service.GetAttendRecordHistoryByStaffId(c, staffId, start, limit)
@@ -218,6 +221,9 @@ func GetAttendRecordIsPayByStaffIdAndDate(c *gin.Context) {
 // @Router /api/attendance_record/approve/query/all [get]
 func GetAttendRecordApproveByLeaderStaffId(c *gin.Context) {
 	leaderStaffId := c.Param("leader_staff_id")
+	if leaderStaffId == "" {
+		leaderStaffId = "all"  // 处理 /approve/query/all 路由
+	}
 	attends, total, err := service.GetAttendRecordApproveByLeaderStaffId(c, leaderStaffId)
 	if err != nil {
 		log.Printf("[GetAttendRecordApproveByLeaderStaffId] err = %v", err)
