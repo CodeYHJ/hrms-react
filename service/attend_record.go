@@ -50,7 +50,9 @@ func UpdateAttendRecordById(c *gin.Context, dto *model.AttendanceRecordEditDTO) 
 		log.Printf("UpdateAttendRecordById err = %v", err)
 		return err
 	}
-	return nil
+	
+	// 同步更新打卡记录
+	return UpdateAttendanceRecordFromClockIn(c, attentRecord.StaffId, attentRecord.Date)
 }
 
 func GetAttendRecordByStaffId(c *gin.Context, staffId string, start int, limit int) ([]*model.AttendanceRecord, int64, error) {

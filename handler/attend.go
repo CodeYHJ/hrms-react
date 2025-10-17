@@ -5,6 +5,7 @@ import (
 	"hrms/resource"
 	"hrms/service"
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,35 @@ func init() {
 		attendGroup.GET("/approve/query/all", GetAttendRecordApproveByLeaderStaffId)
 		attendGroup.GET("/approve_accept/:attendId", ApproveAccept)
 		attendGroup.GET("/approve_reject/:attendId", ApproveReject)
+
+		// 打卡相关
+		clockInGroup := r.Group("/clock_in")
+		clockInGroup.POST("/create", CreateClockIn)
+		clockInGroup.POST("/edit", UpdateClockInById)
+		clockInGroup.GET("/query/:staff_id", GetClockInByStaffId)
+		clockInGroup.GET("/query/all", GetClockInByStaffId)
+
+		// 请假申请相关
+		leaveGroup := r.Group("/leave_request")
+		leaveGroup.POST("/create", CreateLeaveRequest)
+		leaveGroup.POST("/edit", UpdateLeaveRequestById)
+		leaveGroup.GET("/query/:staff_id", GetLeaveRequestByStaffId)
+		leaveGroup.GET("/query/all", GetLeaveRequestByStaffId)
+		leaveGroup.GET("/approve/query/:leader_staff_id", GetLeaveRequestApproveByLeaderStaffId)
+		leaveGroup.GET("/approve/query/all", GetLeaveRequestApproveByLeaderStaffId)
+		leaveGroup.GET("/approve_accept/:leaveId", ApproveLeaveAccept)
+		leaveGroup.GET("/approve_reject/:leaveId", ApproveLeaveReject)
+
+		// 补打卡申请相关
+		punchGroup := r.Group("/punch_request")
+		punchGroup.POST("/create", CreatePunchRequest)
+		punchGroup.POST("/edit", UpdatePunchRequestById)
+		punchGroup.GET("/query/:staff_id", GetPunchRequestByStaffId)
+		punchGroup.GET("/query/all", GetPunchRequestByStaffId)
+		punchGroup.GET("/approve/query/:leader_staff_id", GetPunchRequestApproveByLeaderStaffId)
+		punchGroup.GET("/approve/query/all", GetPunchRequestApproveByLeaderStaffId)
+		punchGroup.GET("/approve_accept/:punchId", ApprovePunchAccept)
+		punchGroup.GET("/approve_reject/:punchId", ApprovePunchReject)
 	})
 }
 
@@ -294,5 +324,461 @@ func ApproveReject(c *gin.Context) {
 
 	LogOperationSuccess(c, staffId, staffName, "UPDATE", "ATTENDANCE",
 		"审批考勤拒绝: "+attendRecord.StaffName+"-"+attendRecord.Date)
+	sendSuccess(c, nil, "审批拒绝成功")
+}
+
+// CreateClockIn godoc
+// @Summary 创建打卡记录
+// @Tags 打卡记录
+// @Accept json
+// @Produce json
+// @Param data body model.ClockInCreateDTO true "打卡记录"
+// @Success 200 {object} Response
+// @Router /api/clock_in/create [post]
+func CreateClockIn(c *gin.Context) {
+	var dto model.ClockInCreateDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "CLOCK_IN",
+			"创建打卡记录失败", err.Error())
+		log.Printf("[CreateClockIn] err = %v", err)
+		sendFail(c, 5001, "打卡失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	err := service.CreateClockIn(c, &dto)
+	if err != nil {
+		log.Printf("[CreateClockIn] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "CLOCK_IN",
+			"创建打卡记录失败: "+dto.StaffName+"-"+dto.Date, err.Error())
+		sendFail(c, 5002, err.Error())
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "CLOCK_IN",
+		"创建打卡记录成功: "+dto.StaffName+"-"+dto.Date)
+	sendSuccess(c, nil, "打卡成功")
+}
+
+// UpdateClockInById godoc
+// @Summary 更新打卡记录
+// @Tags 打卡记录
+// @Accept json
+// @Produce json
+// @Param data body model.ClockInEditDTO true "更新打卡记录信息"
+// @Success 200 {object} model.ClockInEditDTO
+// @Router /api/clock_in/edit [post]
+func UpdateClockInById(c *gin.Context) {
+	var dto model.ClockInEditDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "CLOCK_IN",
+			"更新打卡记录失败", err.Error())
+		log.Printf("[UpdateClockInById] err = %v", err)
+		sendFail(c, 5001, "更新失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var originalClockIn model.ClockIn
+	resource.HrmsDB(c).Where("id = ?", dto.Id).First(&originalClockIn)
+
+	err := service.UpdateClockInById(c, &dto)
+	if err != nil {
+		log.Printf("[UpdateClockInById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "CLOCK_IN",
+			"更新打卡记录失败: "+originalClockIn.StaffName+"-"+originalClockIn.Date, err.Error())
+		sendFail(c, 5002, "更新失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "CLOCK_IN",
+		"更新打卡记录成功: "+originalClockIn.StaffName+"-"+originalClockIn.Date)
+	sendSuccess(c, nil, "更新打卡记录成功")
+}
+
+// GetClockInByStaffId godoc
+// @Summary 查询员工打卡记录
+// @Tags 打卡记录
+// @Accept json
+// @Produce json
+// @Param staff_id path string true "员工ID"
+// @Router /api/clock_in/query/{staff_id} [get]
+// @Router /api/clock_in/query/all [get]
+func GetClockInByStaffId(c *gin.Context) {
+	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"
+	}
+	start, limit := service.AcceptPage(c)
+	list, total, err := service.GetClockInByStaffId(c, staffId, start, limit)
+	if err != nil {
+		log.Printf("[GetClockInByStaffId] err = %v", err)
+		sendFail(c, 5000, err.Error())
+		return
+	}
+	sendTotalSuccess(c, list, total, "")
+}
+
+// CreateLeaveRequest godoc
+// @Summary 创建请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param data body model.LeaveRequestCreateDTO true "请假申请"
+// @Success 200 {object} Response
+// @Router /api/leave_request/create [post]
+func CreateLeaveRequest(c *gin.Context) {
+	var dto model.LeaveRequestCreateDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "LEAVE_REQUEST",
+			"创建请假申请失败", err.Error())
+		log.Printf("[CreateLeaveRequest] err = %v", err)
+		sendFail(c, 5001, "申请失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	err := service.CreateLeaveRequest(c, &dto)
+	if err != nil {
+		log.Printf("[CreateLeaveRequest] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "LEAVE_REQUEST",
+			"创建请假申请失败: "+dto.StaffName+"-"+dto.StartDate+"至"+dto.EndDate, err.Error())
+		sendFail(c, 5002, err.Error())
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "LEAVE_REQUEST",
+		"创建请假申请成功: "+dto.StaffName+"-"+dto.StartDate+"至"+dto.EndDate)
+	sendSuccess(c, nil, "申请成功")
+}
+
+// UpdateLeaveRequestById godoc
+// @Summary 更新请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param data body model.LeaveRequestEditDTO true "更新请假申请信息"
+// @Success 200 {object} model.LeaveRequestEditDTO
+// @Router /api/leave_request/edit [post]
+func UpdateLeaveRequestById(c *gin.Context) {
+	var dto model.LeaveRequestEditDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+			"更新请假申请失败", err.Error())
+		log.Printf("[UpdateLeaveRequestById] err = %v", err)
+		sendFail(c, 5001, "更新失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var originalLeave model.LeaveRequest
+	resource.HrmsDB(c).Where("id = ?", dto.Id).First(&originalLeave)
+
+	err := service.UpdateLeaveRequestById(c, &dto)
+	if err != nil {
+		log.Printf("[UpdateLeaveRequestById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+			"更新请假申请失败: "+originalLeave.StaffName+"-"+originalLeave.StartDate+"至"+originalLeave.EndDate, err.Error())
+		sendFail(c, 5002, "更新失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+		"更新请假申请成功: "+originalLeave.StaffName+"-"+originalLeave.StartDate+"至"+originalLeave.EndDate)
+	sendSuccess(c, nil, "更新请假申请成功")
+}
+
+// GetLeaveRequestByStaffId godoc
+// @Summary 查询员工请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param staff_id path string true "员工ID"
+// @Router /api/leave_request/query/{staff_id} [get]
+// @Router /api/leave_request/query/all [get]
+func GetLeaveRequestByStaffId(c *gin.Context) {
+	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"
+	}
+	start, limit := service.AcceptPage(c)
+	list, total, err := service.GetLeaveRequestByStaffId(c, staffId, start, limit)
+	if err != nil {
+		log.Printf("[GetLeaveRequestByStaffId] err = %v", err)
+		sendFail(c, 5000, err.Error())
+		return
+	}
+	sendTotalSuccess(c, list, total, "")
+}
+
+// GetLeaveRequestApproveByLeaderStaffId godoc
+// @Summary 查询主管待审批的请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param leader_staff_id path string true "主管员工ID"
+// @Router /api/leave_request/approve/query/{leader_staff_id} [get]
+// @Router /api/leave_request/approve/query/all [get]
+func GetLeaveRequestApproveByLeaderStaffId(c *gin.Context) {
+	leaderStaffId := c.Param("leader_staff_id")
+	if leaderStaffId == "" {
+		leaderStaffId = "all"
+	}
+	leaves, total, err := service.GetLeaveRequestApproveByLeaderStaffId(c, leaderStaffId)
+	if err != nil {
+		log.Printf("[GetLeaveRequestApproveByLeaderStaffId] err = %v", err)
+		sendFail(c, 5002, err.Error())
+		return
+	}
+	sendTotalSuccess(c, leaves, total, "")
+}
+
+// ApproveLeaveAccept godoc
+// @Summary 审批通过请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param leaveId path string true "请假申请ID"
+// @Router /api/leave_request/approve_accept/{leaveId} [get]
+func ApproveLeaveAccept(c *gin.Context) {
+	leaveId := c.Param("leaveId")
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var leave model.LeaveRequest
+	resource.HrmsDB(c).Where("leave_id = ?", leaveId).First(&leave)
+
+	if err := service.ApproveLeaveAccept(c, leaveId, strconv.FormatUint(staffId, 10)); err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+			"审批请假失败: "+leave.StaffName+"-"+leave.StartDate+"至"+leave.EndDate, err.Error())
+		sendFail(c, 5000, "审批操作失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+		"审批请假通过: "+leave.StaffName+"-"+leave.StartDate+"至"+leave.EndDate)
+	sendSuccess(c, nil, "审批通过成功")
+}
+
+// ApproveLeaveReject godoc
+// @Summary 审批拒绝请假申请
+// @Tags 请假申请
+// @Accept json
+// @Produce json
+// @Param leaveId path string true "请假申请ID"
+// @Router /api/leave_request/approve_reject/{leaveId} [get]
+func ApproveLeaveReject(c *gin.Context) {
+	leaveId := c.Param("leaveId")
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var leave model.LeaveRequest
+	resource.HrmsDB(c).Where("leave_id = ?", leaveId).First(&leave)
+
+	if err := service.ApproveLeaveReject(c, leaveId, strconv.FormatUint(staffId, 10)); err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+			"审批请假拒绝失败: "+leave.StaffName+"-"+leave.StartDate+"至"+leave.EndDate, err.Error())
+		sendFail(c, 5000, "审批操作失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "LEAVE_REQUEST",
+		"审批请假拒绝: "+leave.StaffName+"-"+leave.StartDate+"至"+leave.EndDate)
+	sendSuccess(c, nil, "审批拒绝成功")
+}
+
+// CreatePunchRequest godoc
+// @Summary 创建补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param data body model.PunchRequestCreateDTO true "补打卡申请"
+// @Success 200 {object} Response
+// @Router /api/punch_request/create [post]
+func CreatePunchRequest(c *gin.Context) {
+	var dto model.PunchRequestCreateDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "PUNCH_REQUEST",
+			"创建补打卡申请失败", err.Error())
+		log.Printf("[CreatePunchRequest] err = %v", err)
+		sendFail(c, 5001, "申请失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	err := service.CreatePunchRequest(c, &dto)
+	if err != nil {
+		log.Printf("[CreatePunchRequest] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "CREATE", "PUNCH_REQUEST",
+			"创建补打卡申请失败: "+dto.StaffName+"-"+dto.Date, err.Error())
+		sendFail(c, 5002, err.Error())
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "CREATE", "PUNCH_REQUEST",
+		"创建补打卡申请成功: "+dto.StaffName+"-"+dto.Date)
+	sendSuccess(c, nil, "申请成功")
+}
+
+// UpdatePunchRequestById godoc
+// @Summary 更新补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param data body model.PunchRequestEditDTO true "更新补打卡申请信息"
+// @Success 200 {object} model.PunchRequestEditDTO
+// @Router /api/punch_request/edit [post]
+func UpdatePunchRequestById(c *gin.Context) {
+	var dto model.PunchRequestEditDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		staffId := getCurrentStaffId(c)
+		staffName := getCurrentStaffName(c)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+			"更新补打卡申请失败", err.Error())
+		log.Printf("[UpdatePunchRequestById] err = %v", err)
+		sendFail(c, 5001, "更新失败")
+		return
+	}
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var originalPunch model.PunchRequest
+	resource.HrmsDB(c).Where("id = ?", dto.Id).First(&originalPunch)
+
+	err := service.UpdatePunchRequestById(c, &dto)
+	if err != nil {
+		log.Printf("[UpdatePunchRequestById] err = %v", err)
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+			"更新补打卡申请失败: "+originalPunch.StaffName+"-"+originalPunch.Date, err.Error())
+		sendFail(c, 5002, "更新失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+		"更新补打卡申请成功: "+originalPunch.StaffName+"-"+originalPunch.Date)
+	sendSuccess(c, nil, "更新补打卡申请成功")
+}
+
+// GetPunchRequestByStaffId godoc
+// @Summary 查询员工补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param staff_id path string true "员工ID"
+// @Router /api/punch_request/query/{staff_id} [get]
+// @Router /api/punch_request/query/all [get]
+func GetPunchRequestByStaffId(c *gin.Context) {
+	staffId := c.Param("staff_id")
+	if staffId == "" {
+		staffId = "all"
+	}
+	start, limit := service.AcceptPage(c)
+	list, total, err := service.GetPunchRequestByStaffId(c, staffId, start, limit)
+	if err != nil {
+		log.Printf("[GetPunchRequestByStaffId] err = %v", err)
+		sendFail(c, 5000, err.Error())
+		return
+	}
+	sendTotalSuccess(c, list, total, "")
+}
+
+// GetPunchRequestApproveByLeaderStaffId godoc
+// @Summary 查询主管待审批的补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param leader_staff_id path string true "主管员工ID"
+// @Router /api/punch_request/approve/query/{leader_staff_id} [get]
+// @Router /api/punch_request/approve/query/all [get]
+func GetPunchRequestApproveByLeaderStaffId(c *gin.Context) {
+	leaderStaffId := c.Param("leader_staff_id")
+	if leaderStaffId == "" {
+		leaderStaffId = "all"
+	}
+	punches, total, err := service.GetPunchRequestApproveByLeaderStaffId(c, leaderStaffId)
+	if err != nil {
+		log.Printf("[GetPunchRequestApproveByLeaderStaffId] err = %v", err)
+		sendFail(c, 5002, err.Error())
+		return
+	}
+	sendTotalSuccess(c, punches, total, "")
+}
+
+// ApprovePunchAccept godoc
+// @Summary 审批通过补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param punchId path string true "补打卡申请ID"
+// @Router /api/punch_request/approve_accept/{punchId} [get]
+func ApprovePunchAccept(c *gin.Context) {
+	punchId := c.Param("punchId")
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var punch model.PunchRequest
+	resource.HrmsDB(c).Where("punch_id = ?", punchId).First(&punch)
+
+	if err := service.ApprovePunchAccept(c, punchId, strconv.FormatUint(staffId, 10)); err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+			"审批补打卡失败: "+punch.StaffName+"-"+punch.Date, err.Error())
+		sendFail(c, 5000, "审批操作失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+		"审批补打卡通过: "+punch.StaffName+"-"+punch.Date)
+	sendSuccess(c, nil, "审批通过成功")
+}
+
+// ApprovePunchReject godoc
+// @Summary 审批拒绝补打卡申请
+// @Tags 补打卡申请
+// @Accept json
+// @Produce json
+// @Param punchId path string true "补打卡申请ID"
+// @Router /api/punch_request/approve_reject/{punchId} [get]
+func ApprovePunchReject(c *gin.Context) {
+	punchId := c.Param("punchId")
+
+	staffId := getCurrentStaffId(c)
+	staffName := getCurrentStaffName(c)
+
+	var punch model.PunchRequest
+	resource.HrmsDB(c).Where("punch_id = ?", punchId).First(&punch)
+
+	if err := service.ApprovePunchReject(c, punchId, strconv.FormatUint(staffId, 10)); err != nil {
+		LogOperationFailure(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+			"审批补打卡拒绝失败: "+punch.StaffName+"-"+punch.Date, err.Error())
+		sendFail(c, 5000, "审批操作失败")
+		return
+	}
+
+	LogOperationSuccess(c, staffId, staffName, "UPDATE", "PUNCH_REQUEST",
+		"审批补打卡拒绝: "+punch.StaffName+"-"+punch.Date)
 	sendSuccess(c, nil, "审批拒绝成功")
 }

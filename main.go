@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hrms/handler"
 	"hrms/resource"
+	"hrms/service"
 	"log"
 	"net/http"
 	"os"
@@ -182,6 +183,10 @@ func main() {
 	if err := InitGorm(); err != nil {
 		log.Fatal(err)
 	}
+
+	// 启动定时任务
+	service.InitCron()
+
 	if err := InitGin(); err != nil {
 		log.Fatal(err)
 	}

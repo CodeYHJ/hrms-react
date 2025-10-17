@@ -46,7 +46,7 @@ CREATE TABLE `authority_detail` (
                                     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `authority_detail` VALUES (4,'supersys','staff_manage','create|delete|update|query','员工管理'),(6,'supersys','dep_manage','create|delete|update|query','部门管理'),(7,'supersys','password_manage','create|delete|update|query','密码管理'),(8,'supersys','rank_manage','create|delete|update|query','职位管理'),(9,'sys','admin_staff_manage','create|delete|update|query','员工管理'),(10,'sys','admin_notification_manage','create|delete|update|query','通知管理'),(11,'normal','normal_notification_manage','query|update','通知管理'),(12,'normal','normal_staff_manage','query|update','员工管理'),(16,'normal','normal_salary_detail_manage','query','工资套账'),(17,'sys','salary_detail_manage','create|delete|update|query','工资套账'),(18,'sys','salary_giving_manage','create|delete|update|query','工资发放管理'),(19,'sys','salary_history_manage','query','工资历史'),(20,'normal','normal_salary_history_manage','query','工资历史'),(21,'sys','attendance_giving_manage','create|delete|update|query','考勤上报'),(22,'sys','attendance_history_manage','query','考勤历史'),(24,'normal','normal_attendance_giving_manage','create|delete|update|query','考勤上报'),(25,'normal','normal_attendance_history_manage','query','考勤历史'),(26,'sys','recruitment_manage','create|delete|update|query','招聘信息管理'),(27,'normal','normal_recruitment_manage','query','招聘信息管理'),(28,'sys','candidate_manage','create|delete|update|query','候选人管理'),(29,'normal','normal_candidate_manage','update|query','候选人管理'),(30,'sys','example_manage','create|delete|update|query','考试信息管理'),(31,'normal','example_manage','query','考试信息管理'),(32,'sys','example_history','query','考试历史'),(33,'normal','normal_example_history','query','考试历史'),(34,'sys','attendance_approve_manage','update|query','考勤审批'),(35,'normal','attendance_approve_manage','update|query','考勤审批');
+INSERT INTO `authority_detail` VALUES (36,'sys','clock_in_manage','create|delete|update|query','打卡管理'),(37,'sys','leave_manage','create|delete|update|query','请假管理'),(38,'sys','punch_manage','create|delete|update|query','补打卡管理'),(39,'normal','clock_in_manage','create|query','打卡管理'),(40,'normal','leave_manage','create|query','请假管理'),(41,'normal','punch_manage','create|query','补打卡管理');
 
 CREATE TABLE `branch_company` (
                                   `id` int NOT NULL AUTO_INCREMENT,
@@ -431,9 +431,63 @@ AND updated_at IS NOT NULL;
 -- 更新staff_lifecycle_log表
 UPDATE staff_lifecycle_log 
 SET 
-action_date = DATE_ADD(action_date, INTERVAL YEAR(CURRENT_DATE) - YEAR(action_date) + (2025 - YEAR(CURRENT_DATE)) YEAR),
-created_at = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
-updated_at = DATE_ADD(updated_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(updated_at) + (2025 - YEAR(CURRENT_DATE)) YEAR)
+    action_date = DATE_ADD(action_date, INTERVAL YEAR(CURRENT_DATE) - YEAR(action_date) + (2025 - YEAR(CURRENT_DATE)) YEAR),
+    created_at = DATE_ADD(created_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(created_at) + (2025 - YEAR(CURRENT_DATE)) YEAR),
+    updated_at = DATE_ADD(updated_at, INTERVAL YEAR(CURRENT_DATE) - YEAR(updated_at) + (2025 - YEAR(CURRENT_DATE)) YEAR)
 WHERE 
-created_at IS NOT NULL 
-AND updated_at IS NOT NULL;
+    created_at IS NOT NULL 
+    AND updated_at IS NOT NULL;
+
+-- 打卡记录表
+CREATE TABLE `clock_in` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `clock_in_id` varchar(32) NOT NULL COMMENT '打卡记录ID',
+    `staff_id` varchar(32) NOT NULL COMMENT '员工ID',
+    `staff_name` varchar(10) NOT NULL COMMENT '员工姓名',
+    `date` date NOT NULL COMMENT '打卡日期',
+    `check_in_time` datetime DEFAULT NULL COMMENT '上班打卡时间',
+    `check_out_time` datetime DEFAULT NULL COMMENT '下班打卡时间',
+    `status` int NOT NULL DEFAULT 0 COMMENT '状态: 0=正常, 1=迟到, 2=早退, 3=缺勤',
+    `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+    `deleted_at` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX idx_staff_date (staff_id, date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打卡记录表';
+
+-- 请假申请表
+CREATE TABLE `leave_request` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `leave_id` varchar(32) NOT NULL COMMENT '请假申请ID',
+    `staff_id` varchar(32) NOT NULL COMMENT '员工ID',
+    `staff_name` varchar(10) NOT NULL COMMENT '员工姓名',
+    `start_date` date NOT NULL COMMENT '请假开始日期',
+    `end_date` date NOT NULL COMMENT '请假结束日期',
+    `leave_type` varchar(20) NOT NULL COMMENT '请假类型: annual=年假, sick=病假, personal=事假',
+    `reason` text COMMENT '请假原因',
+    `approve_status` int NOT NULL DEFAULT 0 COMMENT '审批状态: 0=待审批, 1=通过, 2=拒绝',
+    `approver_id` varchar(32) DEFAULT NULL COMMENT '审批人ID',
+    `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+    `deleted_at` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX idx_staff_status (staff_id, approve_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='请假申请表';
+
+-- 补打卡申请表
+CREATE TABLE `punch_request` (
+    `id` bigint NOT NULL AUTO_INCREMENT,
+    `punch_id` varchar(32) NOT NULL COMMENT '补打卡申请ID',
+    `staff_id` varchar(32) NOT NULL COMMENT '员工ID',
+    `staff_name` varchar(10) NOT NULL COMMENT '员工姓名',
+    `date` date NOT NULL COMMENT '补打卡日期',
+    `requested_time` datetime NOT NULL COMMENT '申请补打卡时间',
+    `reason` text COMMENT '补打卡原因',
+    `approve_status` int NOT NULL DEFAULT 0 COMMENT '审批状态: 0=待审批, 1=通过, 2=拒绝',
+    `approver_id` varchar(32) DEFAULT NULL COMMENT '审批人ID',
+    `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+    `deleted_at` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX idx_staff_status (staff_id, approve_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='补打卡申请表';

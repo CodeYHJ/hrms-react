@@ -27,6 +27,9 @@ export default defineConfig({
             "/password": 'http://localhost:8080/api',
             "/example": 'http://localhost:8080/api',
             "/operation-log": 'http://localhost:8080/api',
+            '/leave_request': 'http://localhost:8080/api',
+            '/punch_request': 'http://localhost:8080/api',
+            '/clock_in': 'http://localhost:8080/api',
         },
     },
     build: {
