@@ -79,5 +79,37 @@ export const attendanceService = {
     rejectAttendance: async (attendanceId) => {
         const response = await api.get(`/attendance_record/approve_reject/${attendanceId}`);
         return response;
+    },
+
+    // 请假申请相关方法
+    getAllLeaveRequests: async () => {
+        const response = await api.get('/leave_request/query/all');
+        return response;
+    },
+
+    approveLeaveRequest: async (leaveId) => {
+        const response = await api.get(`/leave_request/approve_accept/${leaveId}`);
+        return response;
+    },
+
+    rejectLeaveRequest: async (leaveId) => {
+        const response = await api.get(`/leave_request/approve_reject/${leaveId}`);
+        return response;
+    },
+
+    // 补打卡申请相关方法
+    getAllPunchRequests: async () => {
+        const response = await api.get('/punch_request/query/all');
+        return response;
+    },
+
+    approvePunchRequest: async (punchId) => {
+        const response = await api.get(`/punch_request/approve_accept/${punchId}`);
+        return response;
+    },
+
+    rejectPunchRequest: async (punchId) => {
+        const response = await api.get(`/punch_request/approve_reject/${punchId}`);
+        return response;
     }
 };

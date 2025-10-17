@@ -115,10 +115,9 @@ const AttendanceManagement = () => {
   const loadLeaveRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/leave_request/query/all");
-      const result = await response.json();
-      if (result.status === 2000) {
-        setLeaveRequests(result.result || []);
+      const response = await attendanceService.getAllLeaveRequests();
+      if (response.status) {
+        setLeaveRequests(response.data || []);
       }
     } catch (error) {
       message.error("加载请假申请失败");
@@ -131,10 +130,9 @@ const AttendanceManagement = () => {
   const loadPunchRequests = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/punch_request/query/all");
-      const result = await response.json();
-      if (result.status === 2000) {
-        setPunchRequests(result.result || []);
+      const response = await attendanceService.getAllPunchRequests();
+      if (response.status) {
+        setPunchRequests(response.data || []);
       }
     } catch (error) {
       message.error("加载补打卡申请失败");
@@ -146,17 +144,15 @@ const AttendanceManagement = () => {
   // 审批请假申请
   const handleLeaveApprove = async (leaveId, action) => {
     try {
-      const endpoint =
-        action === "accept"
-          ? "/api/leave_request/approve_accept/"
-          : "/api/leave_request/approve_reject/";
-      const response = await fetch(endpoint + leaveId);
-      const result = await response.json();
-      if (result.status === 2000) {
+      const response = action === "accept" 
+        ? await attendanceService.approveLeaveRequest(leaveId)
+        : await attendanceService.rejectLeaveRequest(leaveId);
+      
+      if (response.status) {
         message.success(`请假申请${action === "accept" ? "通过" : "拒绝"}成功`);
         loadLeaveRequests();
       } else {
-        message.error(result.result || "操作失败");
+        message.error(response.message || "操作失败");
       }
     } catch (error) {
       message.error("操作失败");
@@ -166,19 +162,17 @@ const AttendanceManagement = () => {
   // 审批补打卡申请
   const handlePunchApprove = async (punchId, action) => {
     try {
-      const endpoint =
-        action === "accept"
-          ? "/api/punch_request/approve_accept/"
-          : "/api/punch_request/approve_reject/";
-      const response = await fetch(endpoint + punchId);
-      const result = await response.json();
-      if (result.status === 2000) {
+      const response = action === "accept" 
+        ? await attendanceService.approvePunchRequest(punchId)
+        : await attendanceService.rejectPunchRequest(punchId);
+      
+      if (response.status) {
         message.success(
           `补打卡申请${action === "accept" ? "通过" : "拒绝"}成功`
         );
         loadPunchRequests();
       } else {
-        message.error(result.result || "操作失败");
+        message.error(response.message || "操作失败");
       }
     } catch (error) {
       message.error("操作失败");

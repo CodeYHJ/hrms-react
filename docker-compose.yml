@@ -7,7 +7,7 @@ services:
     # image: codeyhj/hrms-docker:latest-linux_arm64
     container_name: hrms_app
     ports:
-      - "8080:8080"
+      - "9090:8080"
     # environment:
     #   - HRMS_ENV=prod
     depends_on:
