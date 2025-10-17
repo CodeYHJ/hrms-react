@@ -20,11 +20,11 @@ COPY . .
 # 拷贝前端构建结果到 Go 工程的某个目录（假设后端会读取 ./dist 提供静态文件）
 COPY --from=frontend-builder ./dist ./dist
 
-# 确保资源目录存在
-RUN mkdir -p ./resource/templates
+# # 确保资源目录存在
+# RUN mkdir -p ./resource/templates
 
-# 复制模板文件到构建阶段
-COPY --from=frontend-builder /frontend/src/templates ./resource/templates
+# # 复制模板文件到构建阶段
+# COPY --from=frontend-builder /frontend/src/templates ./resource/templates
 
 RUN go build -o server .
 
