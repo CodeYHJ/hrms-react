@@ -491,3 +491,259 @@ CREATE TABLE `punch_request` (
     PRIMARY KEY (`id`),
     INDEX idx_staff_status (staff_id, approve_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='补打卡申请表';
+
+-- HRMS V2 薪资计算参数化系统表结构
+-- 税率配置表
+CREATE TABLE IF NOT EXISTS `salary_v2_tax_brackets` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `tax_bracket_id` varchar(32) NOT NULL COMMENT '税率配置ID',
+    `min_income` bigint NOT NULL COMMENT '最低收入(分)',
+    `max_income` bigint DEFAULT NULL COMMENT '最高收入，NULL表示无上限(分)',
+    `tax_rate` decimal(5,2) NOT NULL COMMENT '税率百分比',
+    `quick_deduction` bigint NOT NULL COMMENT '速算扣除数(分)',
+    `description` text DEFAULT NULL COMMENT '描述',
+    `effective_date` date NOT NULL COMMENT '生效日期',
+    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否启用，1启用，0禁用',
+    `created_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+    `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tax_bracket_id` (`tax_bracket_id`),
+    KEY `idx_effective_date` (`effective_date`),
+    KEY `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='税率配置表';
+
+-- 社保费率配置表
+CREATE TABLE IF NOT EXISTS `salary_v2_insurance_rates` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `insurance_rate_id` varchar(32) NOT NULL COMMENT '费率配置ID',
+    `insurance_type` varchar(20) NOT NULL COMMENT '保险类型：pension养老、medical医疗、unemployment失业、housing公积金',
+    `employee_rate` decimal(5,2) NOT NULL COMMENT '个人缴费比例',
+    `employer_rate` decimal(5,2) NOT NULL COMMENT '公司缴费比例',
+    `min_base` bigint DEFAULT NULL COMMENT '缴费基数下限(分)',
+    `max_base` bigint DEFAULT NULL COMMENT '缴费基数上限(分)',
+    `description` text DEFAULT NULL COMMENT '描述',
+    `effective_date` date NOT NULL COMMENT '生效日期',
+    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否启用，1启用，0禁用',
+    `created_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+    `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_insurance_rate_id` (`insurance_rate_id`),
+    KEY `idx_insurance_type` (`insurance_type`),
+    KEY `idx_effective_date` (`effective_date`),
+    KEY `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='社保费率配置表';
+
+-- 计算规则配置表
+CREATE TABLE IF NOT EXISTS `salary_v2_calculation_rules` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `calculation_rule_id` varchar(32) NOT NULL COMMENT '规则配置ID',
+    `rule_type` varchar(50) NOT NULL COMMENT '规则类型：overtime加班、leave请假、attendance考勤、bonus奖金、deduction扣款',
+    `rule_name` varchar(100) NOT NULL COMMENT '规则名称',
+    `rule_value` decimal(10,4) NOT NULL COMMENT '规则数值',
+    `rule_description` text DEFAULT NULL COMMENT '规则描述',
+    `effective_date` date NOT NULL COMMENT '生效日期',
+    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否启用，1启用，0禁用',
+    `created_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+    `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_calculation_rule_id` (`calculation_rule_id`),
+    KEY `idx_rule_type` (`rule_type`),
+    KEY `idx_effective_date` (`effective_date`),
+    KEY `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='计算规则配置表';
+
+-- 系统参数配置表
+CREATE TABLE IF NOT EXISTS `salary_v2_parameters` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `parameter_id` varchar(32) NOT NULL COMMENT '参数配置ID',
+    `parameter_key` varchar(50) NOT NULL COMMENT '参数键名',
+    `parameter_value` varchar(500) NOT NULL COMMENT '参数值',
+    `parameter_type` varchar(20) NOT NULL COMMENT '参数类型：string字符串、number数字、boolean布尔、decimal小数',
+    `parameter_category` varchar(50) DEFAULT NULL COMMENT '参数分类',
+    `parameter_description` text DEFAULT NULL COMMENT '参数描述',
+    `is_editable` tinyint(1) DEFAULT 1 COMMENT '是否可编辑，1是，0否',
+    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否启用，1启用，0禁用',
+    `created_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+    `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_parameter_key` (`parameter_key`),
+    KEY `idx_parameter_category` (`parameter_category`),
+    KEY `idx_is_active` (`is_active`),
+    KEY `idx_is_editable` (`is_editable`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='系统参数配置表';
+
+-- 参数变更历史表
+CREATE TABLE IF NOT EXISTS `salary_v2_parameter_history` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `history_id` varchar(32) NOT NULL COMMENT '历史记录ID',
+    `parameter_type` varchar(20) NOT NULL COMMENT '参数类型：tax_bracket税率、insurance_rate社保、calculation_rule规则、system_parameter系统参数',
+    `parameter_id` varchar(32) NOT NULL COMMENT '参数ID',
+    `old_value` text DEFAULT NULL COMMENT '旧值',
+    `new_value` text DEFAULT NULL COMMENT '新值',
+    `change_reason` text DEFAULT NULL COMMENT '变更原因',
+    `changed_by` varchar(32) NOT NULL COMMENT '变更人',
+    `change_date` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '变更时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_parameter_type` (`parameter_type`),
+    KEY `idx_parameter_id` (`parameter_id`),
+    KEY `idx_changed_by` (`changed_by`),
+    KEY `idx_change_date` (`change_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='参数变更历史表';
+
+-- 插入税率配置示例数据
+INSERT INTO `salary_v2_tax_brackets` (
+    `tax_bracket_id`, `min_income`, `max_income`, `tax_rate`, `quick_deduction`, 
+    `description`, `effective_date`, `is_active`, `created_by`
+) VALUES
+('tax_bracket_001', 0, 350000, 3.00, 0, '0-3500元税率3%', '2024-01-01', 1, 'admin'),
+('tax_bracket_002', 350000, 900000, 10.00, 21000, '3500-9000元税率10%', '2024-01-01', 1, 'admin'),
+('tax_bracket_003', 900000, 2500000, 20.00, 141000, '9000-25000元税率20%', '2024-01-01', 1, 'admin'),
+('tax_bracket_004', 2500000, 3500000, 25.00, 266000, '25000-35000元税率25%', '2024-01-01', 1, 'admin'),
+('tax_bracket_005', 3500000, 5500000, 30.00, 441000, '35000-55000元税率30%', '2024-01-01', 1, 'admin'),
+('tax_bracket_006', 5500000, 8000000, 35.00, 716000, '55000-80000元税率35%', '2024-01-01', 1, 'admin'),
+('tax_bracket_007', 8000000, NULL, 45.00, 1516000, '80000元以上税率45%', '2024-01-01', 1, 'admin');
+
+-- 插入社保费率配置示例数据
+INSERT INTO `salary_v2_insurance_rates` (
+    `insurance_rate_id`, `insurance_type`, `employee_rate`, `employer_rate`, 
+    `min_base`, `max_base`, `description`, `effective_date`, `is_active`, `created_by`
+) VALUES
+('insurance_rate_001', 'pension', 8.00, 16.00, 238000, 1991400, '养老保险费率', '2024-01-01', 1, 'admin'),
+('insurance_rate_002', 'medical', 2.00, 10.00, 238000, 1991400, '医疗保险费率', '2024-01-01', 1, 'admin'),
+('insurance_rate_003', 'unemployment', 0.30, 0.70, 238000, 1991400, '失业保险费率', '2024-01-01', 1, 'admin'),
+('insurance_rate_004', 'housing', 12.00, 12.00, 238000, 1991400, '住房公积金费率', '2024-01-01', 1, 'admin');
+
+-- 插入计算规则配置示例数据
+INSERT INTO `salary_v2_calculation_rules` (
+    `calculation_rule_id`, `rule_type`, `rule_name`, `rule_value`, `rule_description`,
+    `effective_date`, `is_active`, `created_by`
+) VALUES
+('rule_001', 'overtime', '工作日加班计算', 1.5000, '工作日加班按1.5倍计算', '2024-01-01', 1, 'admin'),
+('rule_002', 'overtime', '周末加班计算', 2.0000, '周末加班按2倍计算', '2024-01-01', 1, 'admin'),
+('rule_003', 'overtime', '法定节假日加班计算', 3.0000, '法定节假日加班按3倍计算', '2024-01-01', 1, 'admin'),
+('rule_004', 'leave', '事假扣款计算', 1.0000, '事假按正常工作时间扣款', '2024-01-01', 1, 'admin'),
+('rule_005', 'leave', '病假扣款计算', 0.8000, '病假按80%扣款', '2024-01-01', 1, 'admin'),
+('rule_006', 'attendance', '全勤奖计算', 200.0000, '全勤奖200元', '2024-01-01', 1, 'admin'),
+('rule_007', 'bonus', '绩效奖金计算', 1.0000, '绩效奖金根据系数计算', '2024-01-01', 1, 'admin'),
+('rule_008', 'deduction', '迟到扣款计算', 50.0000, '迟到扣款规则', '2024-01-01', 1, 'admin');
+
+-- 插入系统参数配置示例数据
+INSERT INTO `salary_v2_parameters` (
+    `parameter_id`, `parameter_key`, `parameter_value`, `parameter_type`,
+    `parameter_category`, `parameter_description`, `is_editable`, `is_active`, `created_by`
+) VALUES
+('param_001', 'monthly_work_days', '21.75', 'decimal', 'basic', '每月标准工作日数', 1, 1, 'admin'),
+('param_002', 'daily_work_hours', '8', 'number', 'basic', '每日标准工作小时数', 1, 1, 'admin'),
+('param_003', 'min_wage_standard', '2480', 'decimal', 'basic', '最低工资标准', 1, 1, 'admin'),
+('param_004', 'insurance_base_min', '2380', 'decimal', 'insurance', '社保缴费基数下限', 1, 1, 'admin'),
+('param_005', 'insurance_base_max', '19914', 'decimal', 'insurance', '社保缴费基数上限', 1, 1, 'admin'),
+('param_006', 'housing_base_min', '2380', 'decimal', 'housing', '公积金缴费基数下限', 1, 1, 'admin'),
+('param_007', 'housing_base_max', '19914', 'decimal', 'housing', '公积金缴费基数上限', 1, 1, 'admin'),
+('param_008', 'tax_threshold', '5000', 'decimal', 'tax', '个人所得税起征点', 1, 1, 'admin'),
+('param_009', 'full_attendance_bonus', '200', 'decimal', 'attendance', '全勤奖金额', 1, 1, 'admin'),
+('param_010', 'late_grace_minutes', '5', 'number', 'attendance', '迟到宽限时间（分钟）', 1, 1, 'admin'),
+('param_011', 'early_leave_grace_minutes', '5', 'number', 'attendance', '早退宽限时间（分钟）', 1, 1, 'admin'),
+('param_012', 'overtime_apply_hours', '2', 'number', 'overtime', '加班申请提前时间（小时）', 1, 1, 'admin'),
+('param_013', 'leave_apply_hours', '24', 'number', 'leave', '请假申请提前时间（小时）', 1, 1, 'admin'),
+('param_014', 'salary_calculation_precision', '2', 'number', 'calculation', '工资计算精度（小数位数）', 1, 1, 'admin'),
+('param_015', 'salary_payment_day', '15', 'number', 'payment', '工资发放日', 1, 1, 'admin'),
+('param_016', 'enable_salary_slip', 'true', 'boolean', 'payment', '是否启用工资条', 1, 1, 'admin'),
+('param_017', 'salary_slip_method', 'email', 'string', 'payment', '工资条发送方式：email邮件、sms短信', 1, 1, 'admin'),
+('param_018', 'attendance_cycle', 'monthly', 'string', 'attendance', '考勤统计周期：monthly月度、weekly周度', 1, 1, 'admin'),
+('param_019', 'overtime_approval_flow', 'direct_manager', 'string', 'workflow', '加班审批流程：direct_manager直属领导、multi_level多级', 1, 1, 'admin'),
+('param_020', 'leave_approval_flow', 'direct_manager', 'string', 'workflow', '请假审批流程：direct_manager直属领导、multi_level多级', 1, 1, 'admin'),
+('param_021', 'default_subsidy', '500', 'number', 'salary', '默认住房补贴金额', 1, 1, 'admin'),
+('param_022', 'default_bonus', '1000', 'number', 'salary', '默认绩效奖金金额', 1, 1, 'admin'),
+('param_023', 'default_commission', '0', 'number', 'salary', '默认提成薪资金额', 1, 1, 'admin'),
+('param_024', 'default_other', '0', 'number', 'salary', '默认其他薪资金额', 1, 1, 'admin'),
+('param_025', 'default_fund_enabled', '1', 'boolean', 'salary', '默认是否缴纳五险一金', 1, 1, 'admin');
+
+-- 薪资结构模板表
+CREATE TABLE IF NOT EXISTS `salary_v2_templates` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `template_id` varchar(32) NOT NULL COMMENT '模板ID',
+    `template_name` varchar(100) NOT NULL COMMENT '模板名称',
+    `template_description` text DEFAULT NULL COMMENT '模板描述',
+    `template_type` varchar(20) NOT NULL COMMENT '模板类型：standard标准、custom自定义',
+    `applicable_rank_ids` json DEFAULT NULL COMMENT '适用职级ID列表',
+    `applicable_dep_ids` json DEFAULT NULL COMMENT '适用部门ID列表',
+    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否启用，1启用，0禁用',
+    `created_by` varchar(32) DEFAULT NULL COMMENT '创建人',
+    `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_template_id` (`template_id`),
+    KEY `idx_template_type` (`template_type`),
+    KEY `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='薪资结构模板表';
+
+-- 薪资模板项目表
+CREATE TABLE IF NOT EXISTS `salary_v2_template_items` (
+    `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `item_id` varchar(32) NOT NULL COMMENT '项目ID',
+    `template_id` varchar(32) NOT NULL COMMENT '模板ID',
+    `item_name` varchar(100) NOT NULL COMMENT '项目名称',
+    `item_type` varchar(20) NOT NULL COMMENT '项目类型：base基本工资、subsidy补贴、bonus奖金、commission提成、other其他',
+    `calculation_type` varchar(20) NOT NULL COMMENT '计算类型：fixed固定金额、percentage百分比',
+    `amount` bigint DEFAULT NULL COMMENT '固定金额(分)',
+    `percentage` decimal(5,2) DEFAULT NULL COMMENT '百分比',
+    `base_field` varchar(50) DEFAULT NULL COMMENT '百分比计算基准字段',
+    `sort_order` int DEFAULT 0 COMMENT '排序顺序',
+    `is_required` tinyint(1) DEFAULT 0 COMMENT '是否必填，1是，0否',
+    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at` datetime DEFAULT NULL COMMENT '软删除时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_item_id` (`item_id`),
+    KEY `idx_template_id` (`template_id`),
+    KEY `idx_item_type` (`item_type`),
+    KEY `idx_sort_order` (`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='薪资模板项目表';
+
+-- 插入薪资模板示例数据
+INSERT INTO `salary_v2_templates` (
+    `template_id`, `template_name`, `template_description`, `template_type`, 
+    `applicable_rank_ids`, `applicable_dep_ids`, `is_active`, `created_by`
+) VALUES
+('template_001', '标准薪资结构', '适用于普通员工的标准薪资结构', 'standard', 
+ '["rank_32826814"]', '["dep_1322682358", "dep_2547022224"]', 1, 'admin'),
+('template_002', '管理岗位薪资结构', '适用于管理岗位的薪资结构', 'standard', 
+ '["rank_3404026447"]', '["dep_1322682358", "dep_2547022224", "dep_1460851561"]', 1, 'admin'),
+('template_003', '销售岗位薪资结构', '适用于销售岗位的薪资结构', 'standard', 
+ '["rank_32826814"]', '["dep_913998902"]', 1, 'admin');
+
+-- 插入薪资模板项目示例数据
+INSERT INTO `salary_v2_template_items` (
+    `item_id`, `template_id`, `item_name`, `item_type`, `calculation_type`, 
+    `amount`, `percentage`, `base_field`, `sort_order`, `is_required`
+) VALUES
+-- 标准薪资结构项目
+('item_001', 'template_001', '基本工资', 'base', 'fixed', 800000, NULL, NULL, 1, 1),
+('item_002', 'template_001', '住房补贴', 'subsidy', 'fixed', 150000, NULL, NULL, 2, 0),
+('item_003', 'template_001', '绩效奖金', 'bonus', 'percentage', NULL, 10.00, 'base', 3, 0),
+('item_004', 'template_001', '全勤奖', 'bonus', 'fixed', 20000, NULL, NULL, 4, 0),
+-- 管理岗位薪资结构项目
+('item_005', 'template_002', '基本工资', 'base', 'fixed', 1200000, NULL, NULL, 1, 1),
+('item_006', 'template_002', '住房补贴', 'subsidy', 'fixed', 200000, NULL, NULL, 2, 0),
+('item_007', 'template_002', '绩效奖金', 'bonus', 'percentage', NULL, 15.00, 'base', 3, 0),
+('item_008', 'template_002', '管理津贴', 'bonus', 'fixed', 50000, NULL, NULL, 4, 0),
+-- 销售岗位薪资结构项目
+('item_009', 'template_003', '基本工资', 'base', 'fixed', 600000, NULL, NULL, 1, 1),
+('item_010', 'template_003', '住房补贴', 'subsidy', 'fixed', 100000, NULL, NULL, 2, 0),
+('item_011', 'template_003', '销售提成', 'commission', 'percentage', NULL, 5.00, 'base', 3, 0),
+('item_012', 'template_003', '绩效奖金', 'bonus', 'percentage', NULL, 8.00, 'base', 4, 0);

@@ -30,6 +30,16 @@ export default defineConfig({
             '/leave_request': 'http://localhost:8080/api',
             '/punch_request': 'http://localhost:8080/api',
             '/clock_in': 'http://localhost:8080/api',
+            
+            // V2 API路径配置
+            '/v2': 'http://localhost:8080/api',
+            
+            // 通用API代理配置作为后备
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                rewrite: (path) => path
+            }
         },
     },
     build: {

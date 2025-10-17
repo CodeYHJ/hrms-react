@@ -40,6 +40,13 @@ body {
     background: #fff;
     border-radius: 6px;
     min-height: 280px;
+    overflow-y: auto;
+    max-height: calc(100vh - 112px);
+}
+
+/* 隐藏滚动条样式 */
+.main-layout .ant-layout-sider div::-webkit-scrollbar {
+    display: none;
 }
 
 /* 登录页面样式 - 按照原有设计 */

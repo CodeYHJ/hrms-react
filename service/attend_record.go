@@ -8,6 +8,8 @@ import (
 	"hrms/model"
 	"hrms/resource"
 	"log"
+	"math"
+	"strconv"
 )
 
 func CreateAttendanceRecord(c *gin.Context, dto *model.AttendanceRecordCreateDTO) error {
@@ -195,73 +197,13 @@ func Compute(c *gin.Context, attendId string) error {
 		commission := salaryInfo.Commission
 		other := salaryInfo.Other
 		fund := salaryInfo.Fund
-		// 按出勤天数更新基本工资
-		base = int64((float64(base) / getCurMonthWorkdays()) * float64(workDays))
-		// 更新绩效奖金,每缺勤一天扣1/5
-		if leaveDays > 5 {
-			bonus = 0
+		
+		// 使用V2参数系统计算薪资
+		salaryRecord, err := CalculateSalaryV2(c, tx, staffId, staffName, base, subsidy, bonus, commission, other, fund, workDays, leaveDays, overtimeDays, month)
+		if err != nil {
+			return err
 		}
-		x := float64(5-leaveDays) / 5.0
-		bonus = int64(float64(bonus) * x)
-		// 更新加班工资，按国家法定节假日2倍加班费计算
-		overtimeSalary := int64((float64(base) / getCurMonthWorkdays()) * 2.0 * float64(overtimeDays))
-		// 判断是否交五险一金，不交的话不计算三险
-		salaryRecord := model.SalaryRecord{}
-		amount := float64(overtimeSalary + base + subsidy + bonus + commission + other)
-		if fund == 1 {
-			// 缴纳五险一金，计算个人需缴纳养老保险、失业保险和医疗保险及住房公积金
-			//养老保险金：   800.00 (8%)   1900.00    (19%)
-			//医疗保险金：   200.00 (2%)   1000.00    (10%)
-			//失业保险金：   20.00  (0.2%) 80.00  (0.8%)
-			//基本住房公积金： 1200  (12%)  1200    (12%)
-			//补充住房公积金： 0.00   (0%)   0.00   (0%)
-			//工伤保险金：       0         40.00  (0.4%)
-			///生育保险金：      0         80.00  (0.8%)
-			salaryRecord.PensionInsurance = amount * 0.08
-			salaryRecord.MedicalInsurance = amount * 0.02
-			salaryRecord.UnemploymentInsurance = amount * 0.002
-			salaryRecord.HousingFund = amount * 0.12
-		}
-		// 计算扣除三险及住房公积金后薪资，并以此计算扣税金额
-		amount = amount - salaryRecord.PensionInsurance - salaryRecord.MedicalInsurance -
-			salaryRecord.UnemploymentInsurance - salaryRecord.HousingFund
-		// 以最新税法，起征点5000元计算，七级扣税
-		var tax float64 = 0
-		if amount > 5000 {
-			total := amount - 5000
-			// 按法定税率扣税
-			if total <= 3000 {
-				tax = total * 0.03
-			} else if total <= 12000 {
-				tax = total*0.10 - 210
-			} else if total <= 25000 {
-				tax = total*0.20 - 1410
-			} else if total <= 35000 {
-				tax = total*0.25 - 2660
-			} else if total <= 55000 {
-				tax = total*0.30 - 4410
-			} else if total <= 80000 {
-				tax = total*0.35 - 7160
-			} else if total > 80000 {
-				tax = total*0.45 - 15160
-			}
-		}
-		// 计算税后工资
-		total := amount - tax
-		// 创建薪资记录用于发放
-		salaryRecord.SalaryRecordId = RandomID("salary_record")
-		salaryRecord.StaffId = staffId
-		salaryRecord.StaffName = staffName
-		salaryRecord.Base = base
-		salaryRecord.Subsidy = subsidy
-		salaryRecord.Bonus = bonus
-		salaryRecord.Commission = commission
-		salaryRecord.Overtime = overtimeSalary
-		salaryRecord.Other = other
-		salaryRecord.Tax = tax
-		salaryRecord.Total = total
-		salaryRecord.IsPay = 1
-		salaryRecord.SalaryDate = month
+		
 		// 创建或更新薪资记录
 		affected := tx.Where("staff_id = ? and salary_date = ?", staffId, month).Updates(&salaryRecord).RowsAffected
 		if affected != 0 {
@@ -276,9 +218,6 @@ func Compute(c *gin.Context, attendId string) error {
 	return err
 }
 
-func getCurMonthWorkdays() float64 {
-	return 22.25
-}
 
 func getSalaryInfoByStaffId(tx *gorm.DB, staffId string) (*model.Salary, error) {
 	var salarys []*model.Salary
@@ -296,4 +235,214 @@ func getAttendInfoByAttendId(tx *gorm.DB, attendId string) (*model.AttendanceRec
 		return nil, errors.New("不存在该考勤信息")
 	}
 	return records[0], nil
+}
+
+// CalculateSalaryV2 使用V2参数系统计算薪资
+func CalculateSalaryV2(c *gin.Context, tx *gorm.DB, staffId, staffName string, base, subsidy, bonus, commission, other, fund, workDays, leaveDays, overtimeDays int64, month string) (model.SalaryRecord, error) {
+	var salaryRecord model.SalaryRecord
+	
+	// 获取系统参数
+	monthlyWorkDays, err := GetSystemParameter(c, "monthly_work_days")
+	if err != nil {
+		return salaryRecord, err
+	}
+	
+	// 按出勤天数更新基本工资
+	workDaysFloat := float64(workDays)
+	monthlyWorkDaysFloat, _ := strconv.ParseFloat(monthlyWorkDays.ParameterValue, 64)
+	base = int64((float64(base) / monthlyWorkDaysFloat) * workDaysFloat)
+	
+	// 使用计算规则更新绩效奖金
+	bonus, err = CalculateBonusByRule(c, bonus, leaveDays)
+	if err != nil {
+		return salaryRecord, err
+	}
+	
+	// 使用计算规则计算加班工资
+	overtimeSalary, err := CalculateOvertimeByRule(c, base, overtimeDays)
+	if err != nil {
+		return salaryRecord, err
+	}
+	
+	// 计算应发工资总额
+	amount := float64(overtimeSalary + base + subsidy + bonus + commission + other)
+	
+	// 如果缴纳五险一金，计算个人缴纳部分
+	if fund == 1 {
+		err = CalculateInsuranceDeductions(c, &salaryRecord, amount)
+		if err != nil {
+			return salaryRecord, err
+		}
+	}
+	
+	// 计算扣除五险一金后的应纳税所得额
+	taxableAmount := amount - salaryRecord.PensionInsurance - salaryRecord.MedicalInsurance -
+		salaryRecord.UnemploymentInsurance - salaryRecord.HousingFund
+	
+	// 计算个人所得税
+	tax, err := CalculateIncomeTax(c, taxableAmount)
+	if err != nil {
+		return salaryRecord, err
+	}
+	
+	// 计算税后工资
+	total := taxableAmount - tax
+	
+	// 设置薪资记录
+	salaryRecord.SalaryRecordId = RandomID("salary_record")
+	salaryRecord.StaffId = staffId
+	salaryRecord.StaffName = staffName
+	salaryRecord.Base = base
+	salaryRecord.Subsidy = subsidy
+	salaryRecord.Bonus = bonus
+	salaryRecord.Commission = commission
+	salaryRecord.Overtime = overtimeSalary
+	salaryRecord.Other = other
+	salaryRecord.Tax = tax
+	salaryRecord.Total = total
+	salaryRecord.IsPay = 1
+	salaryRecord.SalaryDate = month
+	
+	return salaryRecord, nil
+}
+
+// CalculateBonusByRule 根据计算规则计算绩效奖金
+func CalculateBonusByRule(c *gin.Context, originalBonus, leaveDays int64) (int64, error) {
+	// 获取绩效奖金计算规则
+	rules, err := GetCalculationRulesByType(c, "leave")
+	if err != nil {
+		return originalBonus, err
+	}
+	
+	// 查找事假扣款规则
+	for _, rule := range rules {
+		if rule.RuleName == "事假扣款计算" {
+			// 简化处理：每缺勤一天扣1/5，超过5天全扣
+			if leaveDays > 5 {
+				return 0, nil
+			}
+			x := float64(5-leaveDays) / 5.0
+			return int64(float64(originalBonus) * x), nil
+		}
+	}
+	
+	// 如果没有找到规则，使用默认逻辑
+	if leaveDays > 5 {
+		return 0, nil
+	}
+	x := float64(5-leaveDays) / 5.0
+	return int64(float64(originalBonus) * x), nil
+}
+
+// CalculateOvertimeByRule 根据计算规则计算加班工资
+func CalculateOvertimeByRule(c *gin.Context, base, overtimeDays int64) (int64, error) {
+	if overtimeDays == 0 {
+		return 0, nil
+	}
+	
+	// 获取月工作日数
+	monthlyWorkDays, err := GetSystemParameter(c, "monthly_work_days")
+	if err != nil {
+		return 0, err
+	}
+	
+	monthlyWorkDaysFloat, _ := strconv.ParseFloat(monthlyWorkDays.ParameterValue, 64)
+	dailyRate := float64(base) / monthlyWorkDaysFloat
+	
+	// 获取加班计算规则
+	rules, err := GetCalculationRulesByType(c, "overtime")
+	if err != nil {
+		return 0, err
+	}
+	
+	// 默认使用工作日加班规则（1.5倍）
+	multiplier := 1.5
+	
+	// 查找加班规则，这里简化处理，实际应该根据加班类型选择
+	for _, rule := range rules {
+		if rule.RuleName == "工作日加班计算" {
+			multiplier = 1.5
+			break
+		} else if rule.RuleName == "周末加班计算" {
+			multiplier = 2.0
+			break
+		} else if rule.RuleName == "法定节假日加班计算" {
+			multiplier = 3.0
+			break
+		}
+	}
+	
+	overtimeSalary := int64(dailyRate * multiplier * float64(overtimeDays))
+	return overtimeSalary, nil
+}
+
+// CalculateInsuranceDeductions 计算五险一金扣除
+func CalculateInsuranceDeductions(c *gin.Context, salaryRecord *model.SalaryRecord, amount float64) error {
+	// 获取社保费率配置
+	rates, err := GetInsuranceRates(c)
+	if err != nil {
+		return err
+	}
+	
+	// 计算各项保险和公积金
+	for _, rate := range rates {
+		personalRate := rate.EmployeeRate / 100.0
+		switch rate.InsuranceType {
+		case "pension":
+			salaryRecord.PensionInsurance = amount * personalRate
+		case "medical":
+			salaryRecord.MedicalInsurance = amount * personalRate
+		case "unemployment":
+			salaryRecord.UnemploymentInsurance = amount * personalRate
+		case "housing":
+			salaryRecord.HousingFund = amount * personalRate
+		}
+	}
+	
+	return nil
+}
+
+// CalculateIncomeTax 计算个人所得税
+func CalculateIncomeTax(c *gin.Context, amount float64) (float64, error) {
+	// 获取个税起征点
+	taxThreshold, err := GetSystemParameter(c, "tax_threshold")
+	if err != nil {
+		return 0, err
+	}
+	
+	threshold, _ := strconv.ParseFloat(taxThreshold.ParameterValue, 64)
+	
+	// 如果应纳税所得额小于等于起征点，不征税
+	if amount <= threshold {
+		return 0, nil
+	}
+	
+	// 获取税率配置
+	taxBrackets, err := GetTaxBrackets(c)
+	if err != nil {
+		return 0, err
+	}
+	
+	// 计算应纳税所得额
+	taxableAmount := amount - threshold
+	
+	// 根据税率配置计算税额
+	for _, bracket := range taxBrackets {
+		if taxableAmount >= float64(bracket.MinIncome) && (bracket.MaxIncome == 0 || taxableAmount <= float64(bracket.MaxIncome)) {
+			taxRate := bracket.TaxRate / 100.0
+			tax := taxableAmount*taxRate - float64(bracket.QuickDeduction)
+			return math.Max(0, tax), nil
+		}
+	}
+	
+	// 如果超过所有税率区间，使用最高税率
+	for _, bracket := range taxBrackets {
+		if bracket.MaxIncome == 0 {
+			taxRate := bracket.TaxRate / 100.0
+			tax := taxableAmount*taxRate - float64(bracket.QuickDeduction)
+			return math.Max(0, tax), nil
+		}
+	}
+	
+	return 0, nil
 }

@@ -20,6 +20,7 @@ import {
   DollarOutlined,
   HistoryOutlined,
   SettingOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 
 const { TabPane } = Tabs;
@@ -375,6 +376,11 @@ const SalaryManagement = () => {
     }
   };
 
+  // 跳转到模板管理页面
+  const handleGoToTemplate = () => {
+    window.location.href = '/app/salary/template';
+  };
+
   // 组件挂载时获取数据
   useEffect(() => {
     fetchSalaryGiving();
@@ -466,9 +472,29 @@ const SalaryManagement = () => {
               }}
               scroll={{ x: 800 }}
             />
-          </TabPane>
-        </Tabs>
-      </Card>
+           </TabPane>
+
+           <TabPane
+             tab={
+               <span>
+                 <FileTextOutlined />
+                 薪资模板
+               </span>
+             }
+             key="template"
+           >
+             <div style={{ textAlign: 'center', padding: '40px 0' }}>
+               <FileTextOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: 16 }} />
+               <div style={{ fontSize: '16px', color: '#666', marginBottom: 24 }}>
+                 薪资模板管理功能已独立，请前往专门的模板管理页面
+               </div>
+               <Button type="primary" size="large" onClick={handleGoToTemplate}>
+                 前往薪资模板管理
+               </Button>
+             </div>
+           </TabPane>
+         </Tabs>
+       </Card>
 
       {/* 新增/编辑模态框 */}
       <Modal

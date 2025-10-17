@@ -122,6 +122,10 @@ const MainLayout = ({ children }) => {
             key: "/salary/history",
             label: "工资历史",
           },
+          {
+            key: "/salary/template",
+            label: "薪资模板",
+          },
         ],
       });
     }
@@ -201,6 +205,41 @@ const MainLayout = ({ children }) => {
       });
     }
 
+    // 系统配置（超级管理员和系统管理员）
+    if (canAccessModule("system_config")) {
+      items.push({
+        key: "/system-config",
+        icon: <SettingOutlined />,
+        label: "参数配置",
+        children: [
+          {
+            key: "/system-config/overview",
+            label: "配置概览",
+          },
+          {
+            key: "/system-config/tax-bracket",
+            label: "税率配置",
+          },
+          {
+            key: "/system-config/insurance-rate",
+            label: "社保费率",
+          },
+          {
+            key: "/system-config/calculation-rule",
+            label: "计算规则",
+          },
+          {
+            key: "/system-config/system-parameter",
+            label: "系统参数",
+          },
+          {
+            key: "/system-config/parameter-history",
+            label: "变更历史",
+          },
+        ],
+      });
+    }
+
     return items;
   }, [canAccessModule]);
 
@@ -260,6 +299,9 @@ const MainLayout = ({ children }) => {
     if (pathname.startsWith('/authority/')) {
       openKeys.push('/authority');
     }
+    if (pathname.startsWith('/system-config/')) {
+      openKeys.push('/system-config');
+    }
     
     return openKeys;
   };
@@ -314,6 +356,14 @@ const MainLayout = ({ children }) => {
       if (pathname.startsWith('/authority/admin')) return ['/authority/admin'];
       if (pathname.startsWith('/authority/role')) return ['/authority/role'];
     }
+    if (pathname.startsWith('/system-config/')) {
+      if (pathname.startsWith('/system-config/overview')) return ['/system-config/overview'];
+      if (pathname.startsWith('/system-config/tax-bracket')) return ['/system-config/tax-bracket'];
+      if (pathname.startsWith('/system-config/insurance-rate')) return ['/system-config/insurance-rate'];
+      if (pathname.startsWith('/system-config/calculation-rule')) return ['/system-config/calculation-rule'];
+      if (pathname.startsWith('/system-config/system-parameter')) return ['/system-config/system-parameter'];
+      if (pathname.startsWith('/system-config/parameter-history')) return ['/system-config/parameter-history'];
+    }
     
     return [pathname];
   };
@@ -337,9 +387,11 @@ const MainLayout = ({ children }) => {
           {collapsed ? "HRMS" : "人力资源管理系统"}
         </div>
         <div style={{ 
-          height: 'calc(100vh - 64px)', 
+          height: 'calc(100vh - 64px)',
           overflowY: 'auto',
-          overflowX: 'hidden'
+          overflowX: 'hidden',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}>
           <Menu
             theme="dark"

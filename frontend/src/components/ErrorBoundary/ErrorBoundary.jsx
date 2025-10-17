@@ -21,13 +21,13 @@ class ErrorBoundary extends React.Component {
     });
   }
 
-  handleReload = () => {
+  handleReload() {
     window.location.reload();
-  };
+  }
 
-  handleGoHome = () => {
+  handleGoHome() {
     window.location.href = "/app/dashboard";
-  };
+  }
 
   render() {
     if (this.state.hasError) {
@@ -58,7 +58,7 @@ class ErrorBoundary extends React.Component {
               </div>
             }
           >
-            {process.env.NODE_ENV === "development" && (
+            {window.location.hostname === "localhost" && (
               <div
                 style={{
                   textAlign: "left",

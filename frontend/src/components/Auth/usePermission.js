@@ -75,7 +75,7 @@ export const usePermission = () => {
         if (user.userType === USER_TYPES.ADMIN) {
             const adminModules = [
                 'staff', 'department', 'rank', 'attendance', 
-                'salary', 'recruitment', 'notification', 'exam', 'authority'
+                'salary', 'recruitment', 'notification', 'exam', 'authority', 'system_config'
             ]
             return adminModules.includes(module)
         }

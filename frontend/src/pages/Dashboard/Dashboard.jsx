@@ -111,8 +111,10 @@ const Dashboard = () => {
                   dataSource={notices}
                   renderItem={(item) => (
                     <List.Item
+                      key={item.notice_id}
                       actions={[
                         <Button 
+                          key={`view-${item.notice_id}`}
                           type="link" 
                           onClick={() => handleViewMore(item)}
                         >

@@ -26,6 +26,7 @@ import SalaryGivingDetail from "./pages/Salary/SalaryGivingDetail";
 import SalaryDetail from "./pages/Salary/SalaryDetail";
 import SalaryDetailForm from "./pages/Salary/SalaryDetailForm";
 import SalaryHistory from "./pages/Salary/SalaryHistory";
+import SalaryTemplateManagement from "./pages/Salary/SalaryTemplateManagement";
 import ExamInfo from "./pages/Exam/ExamInfo";
 import ExamHistory from "./pages/Exam/ExamHistory";
 import NotificationManagement from "./pages/Notification/NotificationManagement";
@@ -42,6 +43,12 @@ import StaffPromotion from "./pages/Staff/StaffPromotion";
 import StaffTransfer from "./pages/Staff/StaffTransfer";
 import StaffResignation from "./pages/Staff/StaffResignation";
 import AttendanceForm from "./pages/Attendance/AttendanceForm";
+import SystemConfig from "./pages/SystemConfig/SystemConfig";
+import TaxBracketManagement from "./pages/SystemConfig/TaxBracketManagement";
+import InsuranceRateManagement from "./pages/SystemConfig/InsuranceRateManagement";
+import CalculationRuleManagement from "./pages/SystemConfig/CalculationRuleManagement";
+import SystemParameterManagement from "./pages/SystemConfig/SystemParameterManagement";
+import ParameterHistoryManagement from "./pages/SystemConfig/ParameterHistoryManagement";
 // 配置全局message
 message.config({
   top: 100,
@@ -85,12 +92,13 @@ function App() {
               />
               <Route path="attendance/add" element={<AttendanceForm />} />
               <Route path="attendance/edit" element={<AttendanceForm />} />
-               <Route path="salary/giving" element={<SalaryGiving />} />
-               <Route path="salary/giving/detail" element={<SalaryGivingDetail />} />
-               <Route path="salary/detail" element={<SalaryDetail />} />
-               <Route path="salary/detail/add" element={<SalaryDetailForm />} />
-               <Route path="salary/detail/edit" element={<SalaryDetailForm />} />
-               <Route path="salary/history" element={<SalaryHistory />} />
+                <Route path="salary/giving" element={<SalaryGiving />} />
+                <Route path="salary/giving/detail" element={<SalaryGivingDetail />} />
+                <Route path="salary/detail" element={<SalaryDetail />} />
+                <Route path="salary/detail/add" element={<SalaryDetailForm />} />
+                <Route path="salary/detail/edit" element={<SalaryDetailForm />} />
+                <Route path="salary/history" element={<SalaryHistory />} />
+                <Route path="salary/template" element={<SalaryTemplateManagement />} />
               <Route path="exam/manage" element={<ExamInfo />} />
               <Route path="exam/history" element={<ExamHistory />} />
               <Route path="notification" element={<NotificationManagement />} />
@@ -121,6 +129,16 @@ function App() {
                 path="operation-log"
                 element={<OperationLogManagement />}
               />
+              <Route
+                path="system-config"
+                element={<Navigate to="/system-config/overview" replace />}
+              />
+              <Route path="system-config/overview" element={<SystemConfig />} />
+              <Route path="system-config/tax-bracket" element={<TaxBracketManagement />} />
+              <Route path="system-config/insurance-rate" element={<InsuranceRateManagement />} />
+              <Route path="system-config/calculation-rule" element={<CalculationRuleManagement />} />
+              <Route path="system-config/system-parameter" element={<SystemParameterManagement />} />
+              <Route path="system-config/parameter-history" element={<ParameterHistoryManagement />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="*" element={<Navigate to="/login" replace />} />
