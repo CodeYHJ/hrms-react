@@ -3,7 +3,8 @@ version: "3.8"
 services:
   # 需要调试把此app注释，然后按照README.md运行
   app:
-    build: .
+    # build: .
+    image: codeyhj/hrms-docker:latest-linux_arm64
     container_name: hrms_app
     ports:
       - "8080:8080"
