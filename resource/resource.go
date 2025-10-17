@@ -26,6 +26,12 @@ type Gin struct {
 func HrmsDB(c *gin.Context) *gorm.DB {
 	cookie, err := c.Cookie("user_cookie")
 	if err != nil || cookie == "" {
+		// 检查是否是API请求
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			// API请求返回默认数据库，避免panic
+			return DefaultDb
+		}
+		// 页面请求重定向到登录页面
 		c.HTML(http.StatusOK, "login.html", nil)
 		return nil
 	}
@@ -34,8 +40,8 @@ func HrmsDB(c *gin.Context) *gorm.DB {
 	if db, ok := DbMapper[dbName]; ok {
 		return db
 	}
-	c.HTML(http.StatusOK, "login.html", nil)
-	return nil
+	// 如果找不到对应数据库，也返回默认数据库
+	return DefaultDb
 }
 
 type Db struct {
